@@ -1,7 +1,8 @@
-from itertools import product
-from joblib import Parallel, delayed
-import time
 import copy
+import time
+from itertools import product
+
+from joblib import Parallel, delayed
 
 from gen_algo.genetic_algorithm import Population
 from gen_algo.tools.tools import save_stats_parameters

@@ -1,7 +1,9 @@
 import random
-from gen_algo.individuals.music_representation import Note, Bar
+
 from gen_algo.individuals.individual import Individual, Gene
-from  gen_algo.tools.midi_utils import convert_to_midi
+from gen_algo.individuals.music_representation import Bar
+from gen_algo.tools.midi_utils import convert_to_midi
+
 
 class GeneMusic(Gene):
 
@@ -24,8 +26,7 @@ class IndividualMusic(Individual):
     def __init__(self, parameters):
         super().__init__(parameters)
         for _ in range(parameters['chromosome size']):
-            self.sequence.append( GeneMusic())
-
+            self.sequence.append(GeneMusic())
 
     def fitness(self):
         return random.random()
@@ -49,7 +50,6 @@ class IndividualMusic(Individual):
         for g in self.sequence:
             r += ord(g.bit)
         return r
-
 
 
 if __name__ == '__main__':

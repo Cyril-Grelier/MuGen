@@ -27,7 +27,7 @@ def convert_to_midi(indiv):
 
 
 # TODO: Try with mingus to playback midi files directly into PyCharm
-import pygame
+# import pygame
 
 '''
 def play_music(music_file):
@@ -92,5 +92,3 @@ sounda.play()
 time.sleep(20)
 
 '''
-
-import mingus
