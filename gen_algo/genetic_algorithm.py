@@ -77,11 +77,13 @@ class Population:
         elif self.parameters['selection'] == 'select_best':
             self.select_best(nb_select)
         elif self.parameters['selection'] == 'select_tournament':
-            self.select_tournament(nb_select, self.parameters['nb selected tournament'])
+            print("faut revoir le code")
+        #     self.select_tournament(nb_select, self.parameters['nb selected tournament'])
         elif self.parameters['selection'] == 'select_wheel':
-            self.select_wheel(nb_select)
-        # elif self.parameters['selection'] == 'adaptative':
-        #
+            print("faut revoir le code")
+        #     self.select_wheel(nb_select)
+        elif self.parameters['selection'] == 'adaptative':
+            print("TODO")
         #     self.select_random(nb_select)
         #     self.select_best(nb_select)
         #     self.select_tournament(nb_select, self.parameters['nb selected tournament'])
@@ -133,23 +135,48 @@ class Population:
                 if random.random() <= self.parameters['proportion crossover']:
                     if len(self.selected) <= i + 1:
                         rand = random.choice(self.selected[0:-1])
-                        first_child, second_child = self.selected[-1].crossover(rand)
+                        first_child, second_child = self.crossover_individual(self.selected[-1], rand)
                     else:
-                        first_child, second_child = self.selected[i].crossover(self.selected[i + 1])
+                        first_child, second_child = self.crossover_individual(self.selected[i], self.selected[i + 1])
                 else:
                     first_child = self.individual_class(self.parameters)
                     second_child = self.individual_class(self.parameters)
                     first_child.sequence = copy.deepcopy(self.selected[i][::])
+                    # the second child will be a copy of a random parents from the selected parents if the number
+                    # of parents is odd
                     sc = random.randrange(len(self.selected[0:-1])) if len(self.selected) <= i + 1 else i + 1
                     second_child.sequence = copy.deepcopy(self.selected[sc].sequence)
                 self.crossed.extend([first_child, second_child])
+
+    def crossover_individual(self, i1, i2):
+        first_child = self.individual_class(self.parameters)
+        second_child = self.individual_class(self.parameters)
+        if i1.parameters['type crossover'] == 'mono-point':
+            rand = random.randint(1, len(i1.sequence))
+            first_child[::] = i1[0:rand] + i2[rand:]
+            second_child[::] = i2[0:rand] + i1[rand:]
+        elif i1.parameters['type crossover'] == 'uniforme':
+            for i in range(i1.parameters['chromosome size']):
+                first_child[i], second_child[i] = (i1[i], i2[i]) if random.random() <= 0.5 else (i2[i], i1[i])
+        return first_child, second_child
 
     def mutation(self):
         self.mutated = []
         for i in self.crossed:
             if random.random() <= self.parameters['proportion mutation']:
-                i.mutation()
+                self.mutation_individual(i)
             self.mutated.append(i)
+
+    def mutation_individual(self, indiv):
+        if self.parameters['mutation'][0] == 'n-flip':
+            for i in random.sample(range(len(indiv.sequence)), self.parameters['mutation'][1]):
+                indiv.sequence[i].bit = 1 - indiv.sequence[i].bit
+        if self.parameters['mutation'][0] == 'bit-flip':
+            length = len(indiv.sequence)
+            p = 1 / length
+            for i in range(length):
+                if random.random() <= p:
+                    indiv.sequence[i].mutate()
 
     def insertion(self):
         if self.parameters['insertion'] == 'fitness':

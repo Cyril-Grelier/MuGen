@@ -1,22 +1,39 @@
 import random
 
-from gen_algo.individuals.individual import Individual
+from midiutil import MIDIFile
+
+from gen_algo.individuals.individual import Individual, Gene
 
 
-class GeneMusic:
+class Note:
 
     def __init__(self):
-        self.note = random.choice(["a", "b", "c", "d", "e", "f", "g"])
-
-    def mutate(self):
-        choice = ["a", "b", "c", "d", "e", "f", "g"].pop(["a", "b", "c", "d", "e", "f", "g"].index(self.note))
-        self.note = random.choice(choice)
+        self.degree = random.randrange(0, 128)
+        self.time = random.randint(0, 4)
+        rand = random.randint(self.time, 4) - self.time
+        self.duration = rand if rand != 0 else 1
 
     def __str__(self):
         return repr(self)
 
     def __repr__(self):
-        return str(self.note)
+        return f'Pitch : {self.degree} [t:{self.time} d:{self.duration}]'
+
+
+class GeneMusic(Gene):
+
+    def __init__(self):
+        super().__init__()
+        self.bit = Note()
+
+    def mutate(self):
+        self.bit = Note()
+
+    def __str__(self):
+        return repr(self)
+
+    def __repr__(self):
+        return str(self.bit)
 
 
 class IndividualMusic(Individual):
@@ -26,37 +43,8 @@ class IndividualMusic(Individual):
         for _ in range(parameters['chromosome size']):
             self.sequence.append(GeneMusic())
 
-    def crossover(self, other):
-        first_child = IndividualMusic(self.parameters)
-        second_child = IndividualMusic(self.parameters)
-        if self.parameters['type crossover'] == 'mono-point':
-            rand = random.randint(1, len(self.sequence))
-            first_child[::] = self[0:rand] + other[rand:]
-            second_child[::] = other[0:rand] + self[rand:]
-        elif self.parameters['type crossover'] == 'uniforme':
-            for i in range(self.parameters['chromosome size']):
-                first_child[i], second_child[i] = (self[i], other[i]) if random.random() <= 0.5 else (
-                other[i], self[i])
-        return first_child, second_child
-
-    def mutation(self):
-        if self.parameters['mutation'][0] == 'n-flip':
-            self.mutation_n_flip(self.parameters['mutation'][1])
-        if self.parameters['mutation'][0] == 'bit-flip':
-            self.mutation_bit_flip()
-
-    def mutation_n_flip(self, n):
-        for i in random.sample(range(len(self.sequence)), n):
-            self.sequence[i].mutate()
-
-    def mutation_bit_flip(self):
-        p = 1 / len(self.sequence)
-        for i in range(len(self.sequence)):
-            if random.random() <= p:
-                self.sequence[i].mutate()
-
     def fitness(self):
-        return sum(v.bit for v in self.sequence)
+        return random.random()
 
     def __eq__(self, other):
         if type(other) != type(self):
@@ -67,14 +55,43 @@ class IndividualMusic(Individual):
         return True
 
     def __repr__(self):
-        r = ""
+        r = f"I: {self.fitness()}"
         for g in self.sequence:
-            r += str(g.bit)
-        r += f" {self.fitness()}"
+            r += f'\n\t{g.bit}'
         return r
 
     def __hash__(self):
-        r = ""
+        r = 0
         for g in self.sequence:
-            r += str(g.bit)
-        return int(r, 2)
+            r += ord(g.bit)
+        return r
+
+
+def convert_to_midi(indiv):
+    """
+
+    :param indiv:
+    :type indiv: IndividualMusic
+    :return: 
+    """
+
+    track = 0
+    channel = 0
+    tempo = 60  # In BPM
+    volume = 100  # 0-127, as per the MIDI standard
+
+    MyMIDI = MIDIFile(1)  # One track, defaults to format 1 (tempo track is created
+    # automatically)
+    MyMIDI.addTempo(track, 0, tempo)
+
+    for i, n in enumerate(indiv):
+        MyMIDI.addNote(track, channel, n.bit.degree, n.bit.time, n.bit.duration, volume)
+
+    with open("major-scale.mid", "wb") as output_file:
+        MyMIDI.writeFile(output_file)
+
+
+if __name__ == '__main__':
+    i = IndividualMusic({'chromosome size': 10})
+    print(i)
+    convert_to_midi(i)
