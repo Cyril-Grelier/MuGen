@@ -17,7 +17,7 @@ class Note:
         return repr(self)
 
     def __repr__(self):
-        return f'degree : {self.degree} [t:{self.time} d:{self.duration}]'
+        return f'Pitch : {self.degree} [t:{self.time} d:{self.duration}]'
 
 
 class GeneMusic(Gene):
