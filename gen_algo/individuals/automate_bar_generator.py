@@ -1,6 +1,6 @@
 import random
-import music_representation
 
+import music_representation
 
 def generate(index, pitch, total_number_of_note):
     '''
