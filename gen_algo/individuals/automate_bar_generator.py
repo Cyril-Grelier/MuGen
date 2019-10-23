@@ -1,6 +1,7 @@
 import random
 
-import music_representation
+from music_representation import Note
+
 
 
 def create_automate():

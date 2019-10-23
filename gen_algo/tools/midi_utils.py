@@ -19,7 +19,7 @@ def convert_to_midi(indiv):
 
     for i, bar in enumerate(indiv):
         for note in bar.bit.keys:
-            print(note)
+            #print(note)
             MyMIDI.addNote(track, channel, note.pitch, note.timestamp, note.duration, volume)
 
     with open("major-scale.mid", "wb") as output_file:
