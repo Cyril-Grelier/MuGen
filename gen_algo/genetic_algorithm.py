@@ -39,6 +39,10 @@ class Population:
 
     def start(self):
         self.statistic()
+        # TODO : remove this
+        from gen_algo.tools.midi_utils import convert_to_midi, play_midi_file
+        for i, indiv in enumerate(self.individuals):
+            convert_to_midi(indiv[0], "ORIGINAL"+str(i) + ".mid")
         while self.final_condition():
             self.population_get_older()
             self.sort_individuals_fitness()

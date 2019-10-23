@@ -1,7 +1,38 @@
 import random
 
 
+
 def generate(index, pitch, total_number_of_note):
+    """
+
+    :param index:
+    :param pitch:
+    :param total_number_of_note:
+    :return:
+    """
+
+    # Pour 1 mesure : avec une resolution de 64
+    # Ronde = 1
+    # Blanche = 1/2
+    # Noire = 1/4
+    # Croche = 1/8
+    # Double croche = 1/16
+    # Triple croche = 1/32
+    # Quadruple croche = 1/64
+
+    used_credit = 0
+    seq_note = []
+
+    while used_credit < 4:
+        new_note_start = used_credit+index
+        new_note_duration = 4
+        new_note = Note(pitch, new_note_start, new_note_duration)
+        seq_note.append(new_note)
+        used_credit += 4
+    #print(seq_note)
+    return seq_note
+
+def generate_old(index, pitch, total_number_of_note):
     """
 
     :param index:
@@ -30,7 +61,8 @@ def generate(index, pitch, total_number_of_note):
         new_note_start = round(used_credit + index, 1)
         new_note_duration = round(random.uniform(0.1, min(4, time_credit - used_credit)), 1)
 
-        if random.random() > (1 - (1 / total_number_of_note) * 3):
+        if random.random() > (1 - (1 / total_number_of_note) * 2):
+        #if random.random() > (1 - (1 / total_number_of_note) ):
             new_note = Note(pitch, new_note_start, new_note_duration)
             seq_note.append(new_note)
 
@@ -63,9 +95,15 @@ class Bar:
         # automate = automate_bar_generator.create_automate()
         # while (automate.has_finished() == False):
         #     self.add_key(automate.next_state())
-        total_number_of_note = 12
-        for note in range(total_number_of_note):
-            self.add_keys(generate(index, note + 48, total_number_of_note))
+        #total_number_of_note = 12
+        #for note in range(total_number_of_note):
+        #    self.add_keys(generate(index, note + 48, total_number_of_note))
+        keys = [1,2,3,4,5,6,7,8,9,10,11,12]
+        new_list =random.sample(keys, 3)
+        #print (new_list)
+
+        for note in new_list:
+            self.add_keys(generate(index, note + 48, 0))
 
     def add_keys(self, keys):
         for key in keys:
