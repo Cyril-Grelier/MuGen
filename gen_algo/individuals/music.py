@@ -42,14 +42,16 @@ class IndividualMusic(Individual):
 
     def fitness(self):
         total_score = 0
+        number_of_keys = 0
         for bars in self.sequence:
             # print("Mesure: ", bars)
             for key in bars.bit.keys:
+                number_of_keys+=1
                 # print("\t",key)
                 for overlapped_key in overlapped_keys(key, bars.bit.keys):
                     total_score += overlapped_key.pitch
 
-        return total_score
+        return total_score/len(number_of_keys)
 
         # return random.random()
 
