@@ -25,7 +25,7 @@ def show_stats(stats):
     fig, ax = plt.subplots(figsize=(10, 10))
 
     plt.xlim(0, len(stats['max_fitness']))
-    plt.ylim(0, stats['parameters']['chromosome size'])
+    plt.ylim(0, stats['max_fitness'][-1] + 10)  # stats['parameters']['chromosome size'])
 
     ax.plot(stats['max_fitness'], color='red', label='max_fitness')
     ax.plot(stats['min_fitness'], color='green', label='min_fitness')
@@ -35,12 +35,12 @@ def show_stats(stats):
     windows_size = 49
     polynomial_order = 3
 
-    ax.plot(savgol_filter(stats['max_fitness'], windows_size, polynomial_order), color='red', linestyle='dashed',
-            label='max_fitness soft')
-    ax.plot(savgol_filter(stats['min_fitness'], windows_size, polynomial_order), color='green', linestyle='dashed',
-            label='min_fitness soft')
-    ax.plot(savgol_filter(stats['mean_fitness'], windows_size, polynomial_order), color='blue', linestyle='dashed',
-            label='mean_fitness soft')
+    # ax.plot(savgol_filter(stats['max_fitness'], windows_size, polynomial_order), color='red', linestyle='dashed',
+    #         label='max_fitness soft')
+    # ax.plot(savgol_filter(stats['min_fitness'], windows_size, polynomial_order), color='green', linestyle='dashed',
+    #         label='min_fitness soft')
+    # ax.plot(savgol_filter(stats['mean_fitness'], windows_size, polynomial_order), color='blue', linestyle='dashed',
+    #         label='mean_fitness soft')
 
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
 
@@ -49,9 +49,9 @@ def show_stats(stats):
 
     fig, ax = plt.subplots(figsize=(10, 10))
 
-    ax.plot(stats['diversity'], color='yellow', label='diversity')
-    ax.plot(stats['max_age'], color='c', label='max_age')
-    ax.plot(stats['mean_age'], color='m', label='mean_age')
+    # ax.plot(stats['diversity'], color='yellow', label='diversity')
+    # ax.plot(stats['max_age'], color='c', label='max_age')
+    # ax.plot(stats['mean_age'], color='m', label='mean_age')
 
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
 

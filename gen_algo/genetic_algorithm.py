@@ -44,6 +44,11 @@ class Population:
             self.sort_individuals_fitness()
             self.turn()
             self.statistic()
+        # TODO : remove this
+        from gen_algo.tools.midi_utils import convert_to_midi, play_midi_file
+        for i, indiv in enumerate(self.individuals):
+            convert_to_midi(indiv[0], str(i) + ".mid")
+            # play_midi_file(str(i) + ".mid")
         return self.termination()
 
     def turn(self):

@@ -1,7 +1,6 @@
 import random
 
-from music_representation import Note
-
+from gen_algo.individuals.music_representation import Note
 
 
 def create_automate():
@@ -92,7 +91,7 @@ class Automate:
         key_duration = self.current_state.transitions_list[random_state].symbol / 8
 
         self.current_state = self.current_state.transitions_list[random_state].destination_state
-        return music_representation.Note(random.randint(50, 90), key_timestamp, key_duration)
+        return Note(random.randint(50, 90), key_timestamp, key_duration)
 
 
 class Transition:
@@ -123,12 +122,9 @@ class State:
     def add_transition(self, transition):
         self.transitions_list.append(transition)
 
-
-'''
-seq_note = []
-print(automate)
-while (automate.has_finished() == False):
-    seq_note.append(automate.next_state())
-
-print (seq_note)
-'''
+# seq_note = []
+# print(automate)
+# while (automate.has_finished() == False):
+#     seq_note.append(automate.next_state())
+#
+# print (seq_note)
