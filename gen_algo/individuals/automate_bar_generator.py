@@ -1,38 +1,7 @@
 import random
 
-import music_representation
+from music_representation import Note
 
-def generate(index, pitch, total_number_of_note):
-    '''
-    Pour 1 mesure : avec une resolution de 64
-    Ronde = 1
-    Blanche = 1/2
-    Noire = 1/4
-    Croche = 1/8
-    Double croche = 1/16
-    Triple croche = 1/32
-    Quadruple croche = 1/64
-    '''
-
-    resolution_per_bar = 4
-    total_number_of_steps =  resolution_per_bar
-    time_credit = total_number_of_steps
-    used_credit = 0
-    seq_note = []
-    print("duree totale : ", time_credit)
-    while (time_credit - used_credit > 0):
-        print(index)
-        new_note_start = round(used_credit+index,1)
-        new_note_duration = round(random.uniform(0.1, min(4, time_credit - used_credit)), 1)
-
-        if random.random() > (1 - (1 / total_number_of_note) * 3):
-            new_note = music_representation.Note(pitch, new_note_start, new_note_duration)
-            seq_note.append(new_note)
-
-        used_credit = round(used_credit + new_note_duration, 1)
-    print(seq_note)
-    print("durée totale:", used_credit)
-    return seq_note
 
 
 def create_automate():
