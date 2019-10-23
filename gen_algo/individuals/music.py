@@ -51,7 +51,7 @@ class IndividualMusic(Individual):
                 for overlapped_key in overlapped_keys(key, bars.bit.keys):
                     total_score += overlapped_key.pitch
 
-        return total_score/len(number_of_keys)
+        return total_score/number_of_keys
 
         # return random.random()
 
