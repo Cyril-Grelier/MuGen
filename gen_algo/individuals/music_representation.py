@@ -14,15 +14,24 @@ class Note:
 
 
 class Bar:
-    def __init__(self):
+    def __init__(self, index):
         self.keys = []
-        self.generate()
+        self.generate(index)
         print(self.keys)
 
-    def generate(self):
+    def generate(self, index):
+        '''
         automate = automate_bar_generator.create_automate()
         while (automate.has_finished() == False):
             self.add_key(automate.next_state())
+        '''
+        total_number_of_note = 12
+        for note in range(total_number_of_note):
+            self.add_keys(automate_bar_generator.generate(index, note+48, total_number_of_note))
+
+    def add_keys(self,keys):
+        for key in keys:
+            self.add_key(key)
 
     def add_key(self, key):
         self.keys.append(key)

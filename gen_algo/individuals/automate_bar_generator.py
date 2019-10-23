@@ -1,8 +1,41 @@
 import random
 import music_representation
 
-def create_automate():
 
+def generate(index, pitch, total_number_of_note):
+    '''
+    Pour 1 mesure : avec une resolution de 64
+    Ronde = 1
+    Blanche = 1/2
+    Noire = 1/4
+    Croche = 1/8
+    Double croche = 1/16
+    Triple croche = 1/32
+    Quadruple croche = 1/64
+    '''
+
+    resolution_per_bar = 4
+    total_number_of_steps =  resolution_per_bar
+    time_credit = total_number_of_steps
+    used_credit = 0
+    seq_note = []
+    print("duree totale : ", time_credit)
+    while (time_credit - used_credit > 0):
+        print(index)
+        new_note_start = round(used_credit+index,1)
+        new_note_duration = round(random.uniform(0.1, min(4, time_credit - used_credit)), 1)
+
+        if random.random() > (1 - (1 / total_number_of_note) * 3):
+            new_note = music_representation.Note(pitch, new_note_start, new_note_duration)
+            seq_note.append(new_note)
+
+        used_credit = round(used_credit + new_note_duration, 1)
+    print(seq_note)
+    print("durée totale:", used_credit)
+    return seq_note
+
+
+def create_automate():
     initial_state = State("Initial State ", 0)
     state_8 = State("State 8 ", 8)
     state_16 = State("State 16 ", 16)
@@ -83,14 +116,14 @@ class Automate:
 
     def next_state(self):
         # print( type(self.current_state.transitions_list[1].destination_state))
-        size_possible_transition = len(self.current_state.transitions_list) -1
-        random_state = random.randint(0,size_possible_transition )
+        size_possible_transition = len(self.current_state.transitions_list) - 1
+        random_state = random.randint(0, size_possible_transition)
 
-        key_timestamp = self.current_state.transitions_list[ random_state ].original_state.value/8
-        key_duration = self.current_state.transitions_list[ random_state ].symbol/8
+        key_timestamp = self.current_state.transitions_list[random_state].original_state.value / 8
+        key_duration = self.current_state.transitions_list[random_state].symbol / 8
 
-        self.current_state = self.current_state.transitions_list[ random_state ].destination_state
-        return music_representation.Note(random.randint(50,90), key_timestamp, key_duration )
+        self.current_state = self.current_state.transitions_list[random_state].destination_state
+        return music_representation.Note(random.randint(50, 90), key_timestamp, key_duration)
 
 
 class Transition:
@@ -109,7 +142,7 @@ class Transition:
 class State:
     def __init__(self, name, value):
         self.name = name
-        self.value = value #THE VALUE OF THE STATE. EG : INITIAL = 0 and STATE_8 = 8
+        self.value = value  # THE VALUE OF THE STATE. EG : INITIAL = 0 and STATE_8 = 8
         self.transitions_list = []
 
     def __str__(self):
@@ -120,8 +153,6 @@ class State:
 
     def add_transition(self, transition):
         self.transitions_list.append(transition)
-
-
 
 
 '''

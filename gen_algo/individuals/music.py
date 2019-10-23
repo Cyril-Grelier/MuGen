@@ -5,9 +5,9 @@ from  gen_algo.tools.midi_utils import convert_to_midi
 
 class GeneMusic(Gene):
 
-    def __init__(self):
+    def __init__(self,index):
         super().__init__()
-        self.bit = Bar()
+        self.bit = Bar(index*4)
 
     def mutate(self):
         self.bit = Bar()
@@ -23,8 +23,8 @@ class IndividualMusic(Individual):
 
     def __init__(self, parameters):
         super().__init__(parameters)
-        for _ in range(parameters['chromosome size']):
-            self.sequence.append( GeneMusic())
+        for index in range(parameters['chromosome size']):
+            self.sequence.append( GeneMusic(index))
 
 
     def fitness(self):
@@ -53,6 +53,6 @@ class IndividualMusic(Individual):
 
 
 if __name__ == '__main__':
-    i = IndividualMusic({'chromosome size': 1})
+    i = IndividualMusic({'chromosome size': 4})
     print(i)
     convert_to_midi(i)
