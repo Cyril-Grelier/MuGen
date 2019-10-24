@@ -1,5 +1,9 @@
-import pygame
+import contextlib
+
 from midiutil import MIDIFile
+
+with contextlib.redirect_stdout(None):
+    import pygame
 
 
 def convert_to_midi(indiv, file, repertory="output/"):
@@ -8,8 +12,7 @@ def convert_to_midi(indiv, file, repertory="output/"):
     tempo = 60  # In BPM
     volume = 100  # 0-127, as per the MIDI standard
 
-    my_midi = MIDIFile(1)  # One track, defaults to format 1 (tempo track is created
-    # automatically)
+    my_midi = MIDIFile(1)  # One track, defaults to format 1 (tempo track is created automatically)
     my_midi.addTempo(track, 0, tempo)
 
     for i, bar in enumerate(indiv.sequence):

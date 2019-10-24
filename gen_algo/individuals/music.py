@@ -12,7 +12,6 @@ def overlapped_keys(key_to_check, bars):
         if key_to_check.pitch != key.pitch:
             if key_to_check.timestamp <= key.timestamp <= (key_to_check.timestamp + key_to_check.duration):
                 overlapped.append(key)
-                # print("key ", key, " overlap ", key_to_check )
     return overlapped
 
 
