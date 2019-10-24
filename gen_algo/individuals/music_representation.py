@@ -1,7 +1,6 @@
 import random
 
 
-
 def generate(index, pitch, total_number_of_note):
     """
 
@@ -24,13 +23,13 @@ def generate(index, pitch, total_number_of_note):
     seq_note = []
 
     while used_credit < 4:
-        new_note_start = used_credit+index
+        new_note_start = used_credit + index
         new_note_duration = 4
         new_note = Note(pitch, new_note_start, new_note_duration)
         seq_note.append(new_note)
         used_credit += 4
-    #print(seq_note)
     return seq_note
+
 
 def generate_old(index, pitch, total_number_of_note):
     """
@@ -62,7 +61,7 @@ def generate_old(index, pitch, total_number_of_note):
         new_note_duration = round(random.uniform(0.1, min(4, time_credit - used_credit)), 1)
 
         if random.random() > (1 - (1 / total_number_of_note) * 2):
-        #if random.random() > (1 - (1 / total_number_of_note) ):
+            # if random.random() > (1 - (1 / total_number_of_note) ):
             new_note = Note(pitch, new_note_start, new_note_duration)
             seq_note.append(new_note)
 
@@ -84,30 +83,3 @@ class Note:
     def __repr__(self):
         return f'Pitch : {self.pitch} [t:{self.timestamp} d:{self.duration}]'
 
-
-class Bar:
-    def __init__(self, index):
-        self.keys = []
-        self.generate(index)
-        # print(self.keys)
-
-    def generate(self, index):
-        # automate = automate_bar_generator.create_automate()
-        # while (automate.has_finished() == False):
-        #     self.add_key(automate.next_state())
-        #total_number_of_note = 12
-        #for note in range(total_number_of_note):
-        #    self.add_keys(generate(index, note + 48, total_number_of_note))
-        keys = [1,2,3,4,5,6,7,8,9,10,11,12]
-        new_list =random.sample(keys, 3)
-        #print (new_list)
-
-        for note in new_list:
-            self.add_keys(generate(index, note + 48, 0))
-
-    def add_keys(self, keys):
-        for key in keys:
-            self.add_key(key)
-
-    def add_key(self, key):
-        self.keys.append(key)
