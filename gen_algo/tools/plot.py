@@ -25,7 +25,7 @@ def show_stats(stats):
     fig, ax = plt.subplots(figsize=(10, 10))
 
     plt.xlim(0, len(stats['max_fitness']))
-    plt.ylim(0, stats['max_fitness'][-1] + 10)  # stats['parameters']['chromosome size'])
+    plt.ylim(0, stats['max_fitness'][-1]*1.1)  # stats['parameters']['chromosome size'])
 
     ax.plot(stats['max_fitness'], color='red', label='max_fitness')
     ax.plot(stats['min_fitness'], color='green', label='min_fitness')
@@ -49,9 +49,9 @@ def show_stats(stats):
 
     fig, ax = plt.subplots(figsize=(10, 10))
 
-    # ax.plot(stats['diversity'], color='yellow', label='diversity')
-    # ax.plot(stats['max_age'], color='c', label='max_age')
-    # ax.plot(stats['mean_age'], color='m', label='mean_age')
+    ax.plot(stats['diversity'], color='yellow', label='diversity')
+    ax.plot(stats['max_age'], color='c', label='max_age')
+    ax.plot(stats['mean_age'], color='m', label='mean_age')
 
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
 
