@@ -198,7 +198,7 @@ def get_distance(file):
     batch_size = 128
     vae, encoder, decoder, x_train, y_train = load_data(False, file)
     data = (x_train, y_train)
-    vae.load_weights('VAE/vae_midi.h5')
+    vae.load_weights('src/vae_midi.h5')
 
     models = (encoder, decoder)
     coord = get_coord(models, data, batch_size=batch_size)

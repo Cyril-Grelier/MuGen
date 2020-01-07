@@ -5,8 +5,9 @@ import numpy as np
 from algo_gen.classes import Individual, Gene
 from midiutil import MIDIFile
 from pretty_midi import PrettyMIDI
+import random
 
-from src.VAE import get_distance
+from src.VAE_orig import Vae
 
 
 def round_down(x, a):
@@ -35,26 +36,47 @@ class GeneDrum(Gene):
         super().__init__()
         self.bit = notes
 
+    def overlapped_keys(self,key_to_check, bars):
+        overlapped = []
+        for key in bars:
+            if key_to_check.pitch != key.pitch:
+                if key_to_check.timestamp <= key.timestamp <= (key_to_check.timestamp + key_to_check.duration):
+                    overlapped.append(key)
+                    # print("key ", key_to_check, " overlapped by ", key )
+        return overlapped
+
+    def check_collision(self,key_to_check, changed_pitch, bars):
+        for key in bars:
+            if (key_to_check.pitch + changed_pitch) == key.pitch:
+                if key_to_check.timestamp <= key.timestamp <= (key_to_check.timestamp + key_to_check.duration):
+                    return False
+        return True
+
     def mutate(self):
-        for n in self.bit:
-            n = 1 - n
+        for key in self.bit:
+            # probability to switch a key
+            if random.random() > 1 / len(self.bit):
+                change_pitch = random.randint(-1, 1)
+                if self.check_collision(key, change_pitch, self.bit) and 49 <= key.pitch + change_pitch <= 58:
+                    key.pitch += change_pitch
 
     def __str__(self):
         pass
 
     def __repr__(self):
         pass
-
+from src.VAE_orig import Vae
 
 class IndividualDrum(Individual):
     _count = 0
+    vae =Vae()
 
     def __init__(self, parameters):
         super().__init__(parameters)
         IndividualDrum._count += 1
         self.ind = IndividualDrum._count
-
         self.generate_seq()
+
 
     def generate_seq(self):
         repertory = "output/"
@@ -79,9 +101,10 @@ class IndividualDrum(Individual):
         my_midi.tracks[0].addChannelPressure(0, 4, 0)
 
         for note in seq_note:
+            self.sequence.append(GeneDrum(note))
             # print(note)
-            my_midi.addNote(track, channel, note.pitch, note.timestamp, note.duration, volume)
-
+            #my_midi.addNote(track, channel, note.pitch, note.timestamp, note.duration, volume)
+        '''
         with open(repertory + file, "wb") as output_file:
             my_midi.writeFile(output_file)
 
@@ -97,13 +120,15 @@ class IndividualDrum(Individual):
                 # a = a.transpose()
                 break
         for i in range(a.shape[0]):
-            self.sequence.append(GeneDrum(list(a[i])))
+            self.sequence.append(GeneDrum(   ))
         # print(len(self.sequence))
         # b = np.array(self.sequence)
         # print(b.shape)
-
+        '''
     def fitness(self):
-        return get_distance("output/" + str(self.ind) + ".mid")
+
+        file = "output/" + str(self.ind) + ".mid"
+        return self.vae.get_distance(file)
 
     def __eq__(self, other):
         if type(other) != type(self):
