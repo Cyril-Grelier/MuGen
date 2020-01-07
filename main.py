@@ -17,8 +17,13 @@ def final_condition(pop):
         return not (pop.nb_turns == pop.parameters['nb turn max'])
 
 
+best_file_path="/ressources/example_midi_file.mid"
+best_fitness= -10000
+
 def function_each_turn(pop):
-    print(pop.nb_turns)
+    #if pop.stats['max_fitness']
+    for p in pop.individuals:
+        print(p)
 
 
 def function_end(pop):
@@ -42,7 +47,7 @@ parameters = {
     'function_each_turn': function_each_turn,
     'function_end': function_end,
 
-    'nb turn max': 10,
+    'nb turn max': 50,
     'stop after no change': 5000000,  # int(config['nb turn max']*0.10),
 
     'selection':
@@ -69,7 +74,7 @@ parameters = {
     'proportion crossover': 0,
 
     'mutation':
-    ['bit-flip'],
+    ['individual'],
     #     ['adaptative',
     #      'UCB',
     #      # 'fixed roulette wheel' 'adaptive roulette wheel' 'adaptive pursuit' 'UCB'

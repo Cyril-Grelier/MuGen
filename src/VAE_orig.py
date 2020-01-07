@@ -307,7 +307,7 @@ class Vae:
         #print(x,y)
 
         distance = math.sqrt(   ( (0-x) **2)  +  ( (0-y) **2) )
-        print(distance)
+        #print(distance)
 
         return distance
 

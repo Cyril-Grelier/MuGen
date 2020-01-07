@@ -1,12 +1,11 @@
 import math
 from random import sample, uniform, randint
-
+import os
 import numpy as np
 from algo_gen.classes import Individual, Gene
 from midiutil import MIDIFile
-from pretty_midi import PrettyMIDI
+import pretty_midi
 import random
-
 from src.VAE_orig import Vae
 
 
@@ -36,7 +35,21 @@ class GeneDrum(Gene):
         super().__init__()
         self.bit = notes
 
-    def overlapped_keys(self,key_to_check, bars):
+    def mutate(self):
+        return "BAD MUTATE FROM GENEDRUM"
+
+    def __str__(self):
+        return str(self.bit)
+
+    def __repr__(self):
+        return __str__()
+
+
+class IndividualDrum(Individual):
+    _count = 0
+    vae =Vae()
+
+    def overlapped_keys(self, key_to_check, bars):
         overlapped = []
         for key in bars:
             if key_to_check.pitch != key.pitch:
@@ -45,31 +58,35 @@ class GeneDrum(Gene):
                     # print("key ", key_to_check, " overlapped by ", key )
         return overlapped
 
-    def check_collision(self,key_to_check, changed_pitch, bars):
+    def check_collision(self, key_to_check, changed_pitch, bars):
         for key in bars:
-            if (key_to_check.pitch + changed_pitch) == key.pitch:
-                if key_to_check.timestamp <= key.timestamp <= (key_to_check.timestamp + key_to_check.duration):
+            if (key_to_check.bit.pitch + changed_pitch) == key.bit.pitch:
+                if key_to_check.bit.timestamp <= key.bit.timestamp <= (key_to_check.bit.timestamp + key_to_check.bit.duration):
                     return False
         return True
 
     def mutate(self):
-        for key in self.bit:
+
+        for key in self.sequence:
+            #print("key",key)
             # probability to switch a key
-            if random.random() > 1 / len(self.bit):
+
+            '''
+            if random.random() > 1 / len(self.sequence):
+                
                 change_pitch = random.randint(-1, 1)
-                if self.check_collision(key, change_pitch, self.bit) and 49 <= key.pitch + change_pitch <= 58:
-                    key.pitch += change_pitch
+                if self.check_collision(key, change_pitch, self.sequence) and 49 <= key.bit.pitch + change_pitch <= 58:
+                    key.bit.pitch += change_pitch
+                    #print("MUTATE KEY")
+                self.sequence.remove(key)
+            '''
 
-    def __str__(self):
-        pass
+            if random.random()>0.5:
+                self.sequence.remove(key)
+            else:
+                self.generate_note()
 
-    def __repr__(self):
-        pass
-from src.VAE_orig import Vae
 
-class IndividualDrum(Individual):
-    _count = 0
-    vae =Vae()
 
     def __init__(self, parameters):
         super().__init__(parameters)
@@ -78,36 +95,47 @@ class IndividualDrum(Individual):
         self.generate_seq()
 
 
-    def generate_seq(self):
-        repertory = "output/"
-        file = str(self.ind) + ".mid"
-        allowed_pitch = [36, 38, 42, 46, 41, 45, 48, 51, 49]
-        max_number_of_notes = 100
-        number_of_notes = randint(20, max_number_of_notes)
-        seq_note = []
-        for x in range(number_of_notes):
-            new_note = Note(sample(allowed_pitch, 1)[0], round_down(round(uniform(0, 7.75), 2), 0.25),
-                            0.25)
-            if new_note not in seq_note:
-                seq_note.append(new_note)
+    def create_midi_file(self):
         track = 0
         channel = 9
         tempo = 120  # In BPM
         volume = 100  # 0-127, as per the MIDI standard
-
         my_midi = MIDIFile(1)  # One track, defaults to format 1 (tempo track is created automatically)
         my_midi.addTempo(track, 0, tempo)
         my_midi.addProgramChange(0, 10, 0, 0)
         my_midi.tracks[0].addChannelPressure(0, 4, 0)
 
-        for note in seq_note:
-            self.sequence.append(GeneDrum(note))
+        repertory = "output/"
+        file = str(self.ind) + ".mid"
+        for note in self.sequence:
             # print(note)
-            #my_midi.addNote(track, channel, note.pitch, note.timestamp, note.duration, volume)
-        '''
+            my_midi.addNote(track, channel, note.bit.pitch, note.bit.timestamp, note.bit.duration, volume)
+
         with open(repertory + file, "wb") as output_file:
             my_midi.writeFile(output_file)
 
+    def generate_note(self):
+
+        allowed_pitch = [36, 38, 42, 46, 41, 45, 48, 51, 49]
+        new_note = Note(sample(allowed_pitch, 1)[0], round_down(round(uniform(0, 7.75), 2), 0.25),
+                        0.25)
+        if new_note not in self.sequence:
+            self.sequence.append(GeneDrum(new_note))
+
+    def generate_seq(self):
+
+        # Create a PrettyMIDI object
+        #pm = pretty_midi.PrettyMIDI()
+
+
+        max_number_of_notes = 100
+        number_of_notes = randint(20, max_number_of_notes)
+        for x in range(number_of_notes):
+            self.generate_note()
+
+        self.create_midi_file()
+
+        '''
         midi_data = PrettyMIDI(repertory + file)
         a = None
         for instrument in midi_data.instruments:
@@ -127,8 +155,11 @@ class IndividualDrum(Individual):
         '''
     def fitness(self):
 
-        file = "output/" + str(self.ind) + ".mid"
-        return self.vae.get_distance(file)
+        self.create_midi_file()
+        repertory = "output/"
+        file = repertory + str(self.ind) + ".mid"
+        return -self.vae.get_distance(file)
+
 
     def __eq__(self, other):
         if type(other) != type(self):
@@ -139,9 +170,10 @@ class IndividualDrum(Individual):
         return True
 
     def __repr__(self):
-        r = f"I: {self.fitness()}"
-        for g in self.sequence:
-            r += f'\n\t{g.bit}'
+        #r = f"I: {self.fitness()}"
+        #for g in self.sequence:
+        #    r += f'\n\t{g.bit}'
+        r = str(self.ind)
         return r
 
     def __hash__(self):
@@ -155,7 +187,7 @@ if __name__ == '__main__':
     i = IndividualDrum({'chromosome size': 12})
     # print(i)
     # convert_to_midi(i, "coucou.mid", "../../output/")
-    print(f'i.fitness() : {i.fitness()}')
+    #print(f'i.fitness() : {i.fitness()}')
 
 # if __name__ == '__main__':
 #     parser = argparse.ArgumentParser()
