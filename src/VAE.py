@@ -76,8 +76,8 @@ def get_features_file(file, class_label):
 
 def get_features_all_data():
     features = []
-    path = 'VAE/dataset_csv/midi_files/'
-    filepath = 'VAE/dataset_csv/dataset.csv'
+    path = 'ressources/dataset_csv/midi_files/'
+    filepath = 'ressources/dataset_csv/dataset.csv'
 
     metadata = pd.read_csv(filepath)
 
@@ -92,6 +92,7 @@ def get_features_all_data():
 
 
 def model(input_shape):
+    print(input_shape)
     intermediate_dim = 512
     latent_dim = 2
     # VAE model = encoder + decoder
@@ -179,7 +180,7 @@ def train():
     # train the autoencoder
     vae.fit(x_train, x_train, epochs=epochs, batch_size=batch_size, validation_data=(x_test, x_test))
     # validation_data=(x_test, None))
-    vae.save_weights('VAE/vae_midi.h5')
+    vae.save_weights('vae_midi.h5')
     models = (encoder, decoder)
     coord = get_coord(models, data, batch_size=batch_size)
 
@@ -191,14 +192,14 @@ def train():
 
 
 def give_distance(model, file):
-    model = tf.keras.models.load_model('VAE/vae_midi.h5')
+    model = tf.keras.models.load_model('vae_midi.h5')
 
 
 def get_distance(file):
     batch_size = 128
     vae, encoder, decoder, x_train, y_train = load_data(False, file)
     data = (x_train, y_train)
-    vae.load_weights('src/vae_midi.h5')
+    vae.load_weights('vae_midi.h5')
 
     models = (encoder, decoder)
     coord = get_coord(models, data, batch_size=batch_size)
