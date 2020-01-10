@@ -6,8 +6,8 @@ from algo_gen.classes import Individual, Gene
 from midiutil import MIDIFile
 import pretty_midi
 import random
-from src.VAE_orig import Vae
-
+from src.new_evaluator.vae_evaluator import Vae
+from copy import deepcopy
 
 def round_down(x, a):
     return math.floor(x / a) * a
@@ -80,19 +80,36 @@ class IndividualDrum(Individual):
                     #print("MUTATE KEY")
                 self.sequence.remove(key)
             '''
-
+            '''
             if random.random()>0.5:
                 self.sequence.remove(key)
             else:
                 self.generate_note()
+            '''
+
+            if random.random() > 1 / len(self.sequence):
+                if random.random()>0.5:
+                    if key.bit.timestamp>0.5:
+                        key.bit.timestamp -= 0.1
+
+                else:
+                    if key.bit.timestamp< 7.5:
+                        key.bit.timestamp += 0.1
+
+    def crossover(self, other):
+        fc = IndividualDrum(self.parameters, empty=True)
+        sc = IndividualDrum(self.parameters, empty=True)
+        fc.sequence = deepcopy(self.sequence)
+        sc.sequence = deepcopy(other.sequence)
+        return fc, sc
 
 
-
-    def __init__(self, parameters):
+    def __init__(self, parameters, empty=False):
         super().__init__(parameters)
         IndividualDrum._count += 1
         self.ind = IndividualDrum._count
-        self.generate_seq()
+        if not empty:
+            self.generate_seq()
 
 
     def create_midi_file(self):
@@ -117,10 +134,13 @@ class IndividualDrum(Individual):
     def generate_note(self):
 
         allowed_pitch = [36, 38, 42, 46, 41, 45, 48, 51, 49]
-        new_note = Note(sample(allowed_pitch, 1)[0], round_down(round(uniform(0, 7.75), 2), 0.25),
-                        0.25)
+        #new_note = Note(sample(allowed_pitch, 1)[0], round_down(round(uniform(0, 7.75), 2), 0.25), 0.25) QUANTIZED
+        new_note = Note(random.sample(allowed_pitch, 1)[0], round(random.uniform(0, 7.75), 2), 0.25) #UNQUANTIZED
         if new_note not in self.sequence:
             self.sequence.append(GeneDrum(new_note))
+
+
+
 
     def generate_seq(self):
 
@@ -158,7 +178,8 @@ class IndividualDrum(Individual):
         self.create_midi_file()
         repertory = "output/"
         file = repertory + str(self.ind) + ".mid"
-        return -self.vae.get_distance(file)
+
+        return abs(self.vae.get_distance(file))
 
 
     def __eq__(self, other):
