@@ -1,11 +1,8 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from keras.layers import Lambda, Input, Dense
-from keras.models import Model
-from keras.losses import mse, binary_crossentropy
-from keras.utils import plot_model
-from keras import backend as K
+from tensorflow.keras.layers import Lambda, Input, Dense
+from tensorflow.keras.models import Model
+from tensorflow.keras.losses import mse, binary_crossentropy
+from tensorflow.keras.utils import plot_model
+from tensorflow.keras import backend as K
 import argparse
 import math
 
@@ -18,9 +15,9 @@ import pretty_midi
 import pandas as pd
 import numpy as np
 
-from keras.layers import Dense,Activation, Dropout
+from tensorflow.keras.layers import Dense,Activation, Dropout
 
-
+from src.data import get_drum
 class Vae:
     def __init__(self):
         self.epochs = 20
@@ -30,15 +27,15 @@ class Vae:
 
         print("LOADING VAE MODEL...")
 
-        x_train, y_train = self.load_data_for_evaluation("ressources/example_midi_file.mid")
+        # x_train, y_train = self.load_data_for_evaluation("ressources/example_midi_file.mid")
 
-        self.vae, self.encoder, self.decoder = self.compile_model(x_train)
-        self.vae.load_weights("src/vae_midi_orig.h5")
+        self.vae, self.encoder, self.decoder = self.compile_model((4800,))
+        self.vae.load_weights("src/vae_centre_sur_random.h5")
         self.models = (self.encoder, self.decoder)
 
-        self.path = '/Users/Cyril_Musique/Documents/Cours/Dataset_NO_GD/dataset_csv/midi_files/'
-        #lakh_path = '/Users/Cyril_Musique/Documents/Cours/M2/SimpleVAEMIDI/Big_Data_Set/1/'
-        filepath = '/Users/Cyril_Musique/Documents/Cours/Dataset_NO_GD/dataset_csv/dataset.csv'
+        filepath = "ressources/dataset_csv/dataset.csv"
+        if not os.path.exists(filepath):
+            filepath = "../ressources/dataset_csv/dataset.csv"
         self.metadata = pd.read_csv(filepath)
 
 
@@ -80,125 +77,114 @@ class Vae:
 
 
 
-    def compile_model(self, x_train):
-
-
-
-
-
-
-
-
-        print("COMPILING MODEL")
-        midi_file_size = x_train.shape[1]
-        input_shape = (midi_file_size,)
+    def compile_model(self, input_shape):
+        intermediate_dim = 512
+        latent_dim = 2
         # VAE model = encoder + decoder
         # build encoder model
         inputs = Input(shape=input_shape, name='encoder_input')
-        x = Dense(self.intermediate_dim, activation='relu')(inputs)
-        z_mean = Dense(self.latent_dim, name='z_mean')(x)
-        z_log_var = Dense(self.latent_dim, name='z_log_var')(x)
+        x = Dense(intermediate_dim, activation='relu')(inputs)
+        z_mean = Dense(latent_dim, name='z_mean')(x)
+        z_log_var = Dense(latent_dim, name='z_log_var')(x)
 
         # use reparameterization trick to push the sampling out as input
         # note that "output_shape" isn't necessary with the TensorFlow backend
-        z = Lambda(self.sampling, output_shape=(self.latent_dim,), name='z')([z_mean, z_log_var])
+        z = Lambda(self.sampling, output_shape=(latent_dim,), name='z')([z_mean, z_log_var])
 
         # instantiate encoder model
         encoder = Model(inputs, [z_mean, z_log_var, z], name='encoder')
-        encoder.summary()
-        plot_model(encoder, to_file='vae_mlp_encoder.png', show_shapes=True)
+        # encoder.summary()
+        # plot_model(encoder, to_file='vae_mlp_encoder.png', show_shapes=True)
 
         # build decoder model
-        latent_inputs = Input(shape=(self.latent_dim,), name='z_sampling')
-        x = Dense(self.intermediate_dim, activation='relu')(latent_inputs)
-        outputs = Dense(midi_file_size, activation='sigmoid')(x)
+        latent_inputs = Input(shape=(latent_dim,), name='z_sampling')
+        x = Dense(intermediate_dim, activation='relu')(latent_inputs)
+        outputs = Dense(input_shape[0], activation='sigmoid')(x)
 
         # instantiate decoder model
         decoder = Model(latent_inputs, outputs, name='decoder')
-        decoder.summary()
-        plot_model(decoder, to_file='vae_mlp_decoder.png', show_shapes=True)
+        # decoder.summary()
+        # plot_model(decoder, to_file='vae_mlp_decoder.png', show_shapes=True)
 
         # instantiate VAE model
         outputs = decoder(encoder(inputs)[2])
-        vae = Model(inputs, outputs, name='vae_mlp')
+        vae = Model(inputs, outputs)  # , name='vae_mlp')
 
-        reconstruction_loss = mse(inputs, outputs)
-        reconstruction_loss *= midi_file_size
-        kl_loss = 1 + z_log_var - K.square(z_mean) - K.exp(z_log_var)
-        kl_loss = K.sum(kl_loss, axis=-1)
-        kl_loss *= -0.5
-        vae_loss = K.mean(reconstruction_loss + kl_loss)
-        # vae.add_loss(vae_loss)
-
-        # loss = 'binary_crossentropy'
-        loss = 'mean_squared_error'
-        vae.compile(optimizer='adam', loss=loss)
-        vae.summary()
-        plot_model(vae,
-                   to_file='vae_mlp.png',
-                   show_shapes=True)
+        vae.compile(optimizer='adam', loss='mean_squared_error', metrics=['accuracy'])
+        # vae.summary()
+        # plot_model(vae, to_file='vae_mlp.png', show_shapes=True)
 
         return vae, encoder, decoder
 
     def load_data_for_evaluation(self,path_to_plot):
-        features = []
-        '''
-        # Iterate through each midi file and extract the features
-        for index, row in self.metadata.iterrows():
-            path_midi_file = self.path + str(row["File"])
-            if row["Score"] == 100:
-                class_label = float(row["Score"]) / 100
-                midi_data = pretty_midi.PrettyMIDI(path_midi_file)
-                for instrument in midi_data.instruments:
-                    instrument.is_drum = False
-                if len(midi_data.instruments) > 0:
-                    data = midi_data.get_piano_roll(fs=8)
-                    data.resize(3968)
-                    result = np.where(data == 80)
-
-                    features.append([data, class_label])
-        '''
-        '''
-        # GRAB A 50 AND CALCULATE ITS DISTANCE
-        for index, row in metadata.iterrows():
-            path_midi_file = path+ str(row["File"])
-            if row["File"] == "27_random.mid":
-                class_label = float(row["Score"]) / 100
-                midi_data = pretty_midi.PrettyMIDI(path_midi_file)
-                for instrument in midi_data.instruments:
-                    instrument.is_drum=False
-                if len(midi_data.instruments)>0:
-                    data  = midi_data.get_piano_roll(fs=8)
-                    data.resize(3968)
-                    result = np.where(data == 80)
-    
-                    features.append([data, class_label])
-        '''
-        class_label = 0
+        # features = []
+        # '''
+        # # Iterate through each midi file and extract the features
+        # for index, row in self.metadata.iterrows():
+        #     path_midi_file = self.path + str(row["File"])
+        #     if row["Score"] == 100:
+        #         class_label = float(row["Score"]) / 100
+        #         midi_data = pretty_midi.PrettyMIDI(path_midi_file)
+        #         for instrument in midi_data.instruments:
+        #             instrument.is_drum = False
+        #         if len(midi_data.instruments) > 0:
+        #             data = midi_data.get_piano_roll(fs=8)
+        #             data.resize(3968)
+        #             result = np.where(data == 80)
+        #
+        #             features.append([data, class_label])
+        # '''
+        # '''
+        # # GRAB A 50 AND CALCULATE ITS DISTANCE
+        # for index, row in metadata.iterrows():
+        #     path_midi_file = path+ str(row["File"])
+        #     if row["File"] == "27_random.mid":
+        #         class_label = float(row["Score"]) / 100
+        #         midi_data = pretty_midi.PrettyMIDI(path_midi_file)
+        #         for instrument in midi_data.instruments:
+        #             instrument.is_drum=False
+        #         if len(midi_data.instruments)>0:
+        #             data  = midi_data.get_piano_roll(fs=8)
+        #             data.resize(3968)
+        #             result = np.where(data == 80)
+        #
+        #             features.append([data, class_label])
+        # '''
+        # class_label = 0
+        # midi_data = pretty_midi.PrettyMIDI(path_to_plot)
+        #
+        # for instrument in midi_data.instruments:
+        #     instrument.is_drum = False
+        # if len(midi_data.instruments) > 0:
+        #     data = midi_data.get_piano_roll(fs=8)
+        #     data.resize(3968)
+        #     result = np.where(data == 80)
+        #
+        #     features.append([data, class_label])
+        #
+        # # Convert into a Panda dataframe
+        # featuresdf = pd.DataFrame(features, columns=['feature', 'class_label'])
+        #
+        # #print('Finished feature extraction from ', len(featuresdf), ' files')
+        #
+        # # Convert features & labels into numpy arrays
+        # X = np.array(featuresdf.feature.tolist())
+        # y = np.array(featuresdf.class_label.tolist())
+        #
+        # #print(X.shape, y.shape)
+        # # split the dataset
         midi_data = pretty_midi.PrettyMIDI(path_to_plot)
-
+        a = None
         for instrument in midi_data.instruments:
-            instrument.is_drum = False
-        if len(midi_data.instruments) > 0:
-            data = midi_data.get_piano_roll(fs=8)
-            data.resize(3968)
-            result = np.where(data == 80)
-
-            features.append([data, class_label])
-
-        # Convert into a Panda dataframe
-        featuresdf = pd.DataFrame(features, columns=['feature', 'class_label'])
-
-        #print('Finished feature extraction from ', len(featuresdf), ' files')
-
-        # Convert features & labels into numpy arrays
-        X = np.array(featuresdf.feature.tolist())
-        y = np.array(featuresdf.class_label.tolist())
-
-        #print(X.shape, y.shape)
-        # split the dataset
-
-
+            if instrument.is_drum:
+                instrument.is_drum = False
+                a = instrument.get_piano_roll()[36:48]
+                a[a > 0] = 1
+                a = np.pad(a, [(0, 0), (0, 400 - a.shape[1])], 'constant')
+                a = a.astype(dtype=bool)
+                a.resize(4800)
+        X = a
+        y = np.array(0)
         x_train = X
         y_train = y
 
@@ -208,7 +194,7 @@ class Vae:
         #input_shape = (midi_file_size,)
 
 
-        x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:])))
+        # x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:])))
 
 
         #return vae, encoder, decoder, x_train, y_train
@@ -278,18 +264,36 @@ class Vae:
         return vae, encoder, decoder, x_train, y_train, x_test, y_test
 
     def train(self):
-        vae, encoder, decoder, x_train, y_train, x_test, y_test = load_data_for_training(path_to_plot)
+        batch_size = 128
+        epochs = 100
+        batch_size = 128
+        vae, encoder, decoder, x_train, y_train, x_test, y_test = load_data(True)
         data = (x_train, y_train)
-        models = (encoder, decoder)
-
         # train the autoencoder
-        vae.fit(x_train,
-                x_train,
-                epochs=epochs,
-                batch_size=batch_size,
-                validation_data=(x_test, x_test))
+        vae.fit(x_train, x_train, epochs=epochs, batch_size=batch_size, validation_data=(x_test, x_test))
         # validation_data=(x_test, None))
         vae.save_weights('vae_midi.h5')
+        models = (encoder, decoder)
+        coord = get_coord(models, data, batch_size=batch_size)
+
+        x = coord[:, 0]
+        y = coord[:, 1]
+        # print(x, y)
+
+        # distance = math.sqrt(((0 - x) ** 2) + ((0 - y) ** 2))
+    # def train(self):
+    #     vae, encoder, decoder, x_train, y_train, x_test, y_test = load_data_for_training(path_to_plot)
+    #     data = (x_train, y_train)
+    #     models = (encoder, decoder)
+    #
+    #     # train the autoencoder
+    #     vae.fit(x_train,
+    #             x_train,
+    #             epochs=epochs,
+    #             batch_size=batch_size,
+    #             validation_data=(x_test, x_test))
+    #     # validation_data=(x_test, None))
+    #     vae.save_weights('vae_midi.h5')
 
 
     def get_distance(self,midi_file_path):
@@ -310,7 +314,3 @@ class Vae:
         #print(distance)
 
         return distance
-
-    
-    
-        

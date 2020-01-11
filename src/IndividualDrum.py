@@ -31,6 +31,7 @@ class Note:
 
 class GeneDrum(Gene):
 
+
     def __init__(self, notes):
         super().__init__()
         self.bit = notes
@@ -42,7 +43,7 @@ class GeneDrum(Gene):
         return str(self.bit)
 
     def __repr__(self):
-        return __str__()
+        return str(self)
 
 
 class IndividualDrum(Individual):

@@ -41,7 +41,8 @@ parameters = {
     'termination_condition': final_condition,
     'function_each_turn': function_each_turn,
     'function_end': function_end,
-    'nb turn max': 500,
+
+    'nb turn max': 10,
     'stop after no change': 5000000,
     'selection': ['select_best'],
     'proportion selection': 1,
