@@ -36,16 +36,16 @@ def function_end(pop):
 parameters = {
     'configuration name': 'config1',
     'individual': IndividualDrum,
-    'population size': 2,  # 100 200 500
+    'population size': 50,  # 100 200 500
     'chromosome size': 12,  # 5 10 50 100
     'termination_condition': final_condition,
     'function_each_turn': function_each_turn,
     'function_end': function_end,
 
-    'nb turn max': 10,
+    'nb turn max': 50,
     'stop after no change': 5000000,
     'selection': ['select_best'],
-    'proportion selection': 1,
+    'proportion selection': 0.2,
     'crossover': ['individual'],
     'proportion crossover': 1,
     'mutation': ['individual'],

@@ -110,3 +110,5 @@ midi/*
 src/test
 
 test/
+
+output/*.mid

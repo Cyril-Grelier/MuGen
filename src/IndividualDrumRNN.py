@@ -51,7 +51,7 @@ class IndividualDrum(Individual):
     _count = 0
     model = get_model('src/rnn_10_classes.h5')  # ("src/weights_rnn.h5")
 
-    def __init__(self, parameters, empty=True):
+    def __init__(self, parameters, empty=False):
         super().__init__(parameters)
         IndividualDrum._count += 1
         self.ind = IndividualDrum._count
@@ -66,13 +66,20 @@ class IndividualDrum(Individual):
         return fc, sc
 
     def mutate(self):
-        self.generate_note()
+        # self.generate_note()
         for key in self.sequence:
             # self.generate_note()
-            if random.random() > 0.5:
-                self.sequence.remove(key)
-            else:
-                self.generate_note()
+            if random.random() > 1 / len(self.sequence):
+                if random.random() > 0.5:
+                    if key.bit.timestamp > 0.5:
+                        key.bit.timestamp -= 0.1
+                else:
+                    if key.bit.timestamp < 7.5:
+                        key.bit.timestamp += 0.1
+            # if random.random() > 0.5:
+            #     self.sequence.remove(key)
+            # else:
+            #     self.generate_note()
 
     def create_midi_file(self):
         track = 0
