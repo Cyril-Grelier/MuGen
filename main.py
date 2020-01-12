@@ -3,7 +3,8 @@ import signal
 from algo_gen.classes import Population
 from algo_gen.tools.plot import show_stats
 
-from src.IndividualDrumRNN import IndividualDrum
+#from src.IndividualDrumRNN import IndividualDrum
+from src.IndividualDrum import IndividualDrum
 
 
 def final_condition(pop):
@@ -18,11 +19,11 @@ def final_condition(pop):
         return not (pop.nb_turns == pop.parameters['nb turn max'])
 
 
-
 def function_each_turn(pop):
+
     # if pop.stats['max_fitness']
-    # for p in pop.individuals:
-    #     print(p)
+    #for p in pop.individuals:
+        #print(p)
     print(f'\rturn, {pop.nb_turns}, max : {pop.stats["max_fitness"][-1]} ', end="")
 
 
@@ -36,13 +37,13 @@ def function_end(pop):
 parameters = {
     'configuration name': 'config1',
     'individual': IndividualDrum,
-    'population size': 50,  # 100 200 500
+    'population size': 100,  # 100 200 500
     'chromosome size': 12,  # 5 10 50 100
     'termination_condition': final_condition,
     'function_each_turn': function_each_turn,
     'function_end': function_end,
 
-    'nb turn max': 50,
+    'nb turn max': 20,
     'stop after no change': 5000000,
     'selection': ['select_best'],
     'proportion selection': 0.2,

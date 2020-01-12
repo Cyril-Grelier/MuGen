@@ -6,7 +6,7 @@ from algo_gen.classes import Individual, Gene
 from midiutil import MIDIFile
 import pretty_midi
 import random
-from src.new_evaluator.vae_evaluator import Vae
+from src.Convolutional_VAE.cvae_evaluator import CVae
 from copy import deepcopy
 
 def round_down(x, a):
@@ -48,7 +48,7 @@ class GeneDrum(Gene):
 
 class IndividualDrum(Individual):
     _count = 0
-    vae =Vae()
+    vae =CVae()
 
     def overlapped_keys(self, key_to_check, bars):
         overlapped = []
@@ -81,21 +81,20 @@ class IndividualDrum(Individual):
                     #print("MUTATE KEY")
                 self.sequence.remove(key)
             '''
-            '''
-            if random.random()>0.5:
+
+            if random.random()>0.1:
                 self.sequence.remove(key)
-            else:
                 self.generate_note()
-            '''
+
 
             if random.random() > 1 / len(self.sequence):
                 if random.random()>0.5:
                     if key.bit.timestamp>0.5:
-                        key.bit.timestamp -= 0.1
+                        key.bit.timestamp -= 0.01
 
                 else:
                     if key.bit.timestamp< 7.5:
-                        key.bit.timestamp += 0.1
+                        key.bit.timestamp += 0.01
 
     def crossover(self, other):
         fc = IndividualDrum(self.parameters, empty=True)
@@ -180,7 +179,7 @@ class IndividualDrum(Individual):
         repertory = "output/"
         file = repertory + str(self.ind) + ".mid"
 
-        return abs(self.vae.get_distance(file))
+        return -abs(self.vae.get_distance(file, self.ind ))
 
 
     def __eq__(self, other):
