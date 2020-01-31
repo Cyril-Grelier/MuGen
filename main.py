@@ -6,6 +6,8 @@ from algo_gen.tools.plot import show_stats
 #from src.IndividualDrumRNN import IndividualDrum
 from src.IndividualDrum import IndividualDrum
 
+import tensorflow as tf
+
 
 def final_condition(pop):
     if pop.nb_turns >= pop.parameters['stop after no change']:
@@ -29,22 +31,33 @@ def function_each_turn(pop):
 
 
 def function_end(pop):
-    print()
+    #tf.get_logger().setLevel('INFO')
     print(pop.individuals)
-    print(f'fitness max : {max(pop.stats["max_fitness"])}')
+    pop.individuals[0][0].create_midi_file()
+    pop.individuals[len(pop.individuals)-1][0].create_midi_file()
+    #print(f'fitness max : {max(pop.stats["max_fitness"])}')
+    print("best: ", pop.individuals[0])
+    pop.individuals[0][0].fitness(should_print=True)
+    print("worst: ", pop.individuals[len(pop.individuals)-1])
+
+
+    pop.individuals[len(pop.individuals)-1][0].fitness(should_print=True)
+
+
+    #max(pop.stats["max_fitness"])
 
 
 parameters = {
     'configuration name': 'config1',
     'individual': IndividualDrum,
-    'population size': 100,  # 100 200 500
+    'population size': 80,  # 100 200 500
     'chromosome size': 12,  # 5 10 50 100
     'termination_condition': final_condition,
     'function_each_turn': function_each_turn,
     'function_end': function_end,
 
-    'nb turn max': 20,
-    'stop after no change': 5000000,
+    'nb turn max': 1000,
+    'stop after no change': 5000,
     'selection': ['select_best'],
     'proportion selection': 0.2,
     'crossover': ['individual'],

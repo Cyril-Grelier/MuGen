@@ -54,9 +54,11 @@ class CVae:
         self.vae, self.encoder, self.decoder = self.compile_model(data_to_initialize_model)
 
         #weights = "src/Convolutional_VAE/good_only.h5"
-        weights = "src/Convolutional_VAE/all_dataset.h5"
-        print("LOADING WEIGHTS")
-        self.vae.load_weights(weights)
+        #weights = "src/Convolutional_VAE/all_dataset.h5"
+        #print("LOADING WEIGHTS")
+        #self.vae.load_weights(weights)
+
+        #REMEMBER NO WEIGHTS
 
         data_to_plot = self.load_all_data("/Users/Cyril_Musique/Documents/Cours/M2/MuGen/datasets/quantized_rythm_dataset_v2_temperature/100",1,0)
         self.create_plot(data_to_plot)
@@ -73,7 +75,7 @@ class CVae:
         #for i, txt in enumerate(self.list_files_name):  # pour toute la dataset [ :int(dataset_size *2* test_size)]
             #plt.annotate(txt, (z_mean[i, 0], z_mean[i, 1]))
 
-        plt.show()
+        #plt.show(block=False)
 
     def add_to_plot(self, z_mean, data_to_plot_y):
 
@@ -109,7 +111,7 @@ class CVae:
             for i, txt in enumerate(self.list_files_name): #pour toute la dataset [ :int(dataset_size *2* test_size)]
                 plt.annotate(txt,(z_mean[i,0], z_mean[i,1]))
 
-            plt.show()
+            #plt.show(block=False)
         return z_mean
 
 
