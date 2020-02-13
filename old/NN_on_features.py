@@ -187,7 +187,7 @@ optimizer = Adam(lr=0.01)
 
 model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
 # model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-model.summary()
+# model.summary()
 tf.keras.utils.plot_model(model, to_file='model_archi.png', show_shapes=True)
 
 number = 1

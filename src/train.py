@@ -26,7 +26,7 @@ def train_model(model_type, data_fct, loss, optimizer, epochs, batch_size, name)
 
 def compile(model, loss, optimizer):
     model.compile(loss=loss, optimizer=optimizer, metrics=['accuracy'])
-    model.summary()
+    # model.summary()
     tf.keras.utils.plot_model(model, to_file='model_archi.png', show_shapes=True)
 
 

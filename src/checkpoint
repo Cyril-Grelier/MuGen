@@ -1,2 +1,2 @@
-model_checkpoint_path: "/Users/Cyril_Musique/Documents/Cours/M2/MuGen/src/rl_tuner_note_rnn.ckpt"
-all_model_checkpoint_paths: "/Users/Cyril_Musique/Documents/Cours/M2/MuGen/src/rl_tuner_note_rnn.ckpt"
+model_checkpoint_path: "rl_tuner_note_rnn.ckpt"
+all_model_checkpoint_paths: "rl_tuner_note_rnn.ckpt"

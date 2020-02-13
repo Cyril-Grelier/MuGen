@@ -3,10 +3,10 @@ import signal
 from algo_gen.classes import Population
 from algo_gen.tools.plot import show_stats
 
-#from src.IndividualDrumRNN import IndividualDrum
+# from src.IndividualDrumRNN import IndividualDrum
 from src.IndividualDrum import IndividualDrum
-
-import tensorflow as tf
+import os
+from glob import glob
 
 
 def final_condition(pop):
@@ -21,57 +21,60 @@ def final_condition(pop):
         return not (pop.nb_turns == pop.parameters['nb turn max'])
 
 
-
-worst_indiv = None
 def function_each_turn(pop):
+    files = glob('output/worse*.mid')
+    if len(files) == 1:
+        worse = float(files[0].split('_')[1].split('.')[0])
+        worse_fit = pop.individuals[-1][1]
+        if worse_fit < worse:
+            os.remove(files[0])
+            worse_indiv = pop.individuals[-1][0]
+            worse_indiv.create_midi_file(file_name='worse_' + str(worse_fit))
+    else:
+        worse_indiv = pop.individuals[-1][0]
+        worse_fit = pop.individuals[-1][1]
+        worse_indiv.create_midi_file(file_name='worse_' + str(worse_fit))
 
-    global worst_indiv
-    if pop.nb_turns == 0:
-        worst_indiv = pop.individuals[-1]
-    if worst_indiv[1]>=pop.individuals[-1][1]:
-        worst_indiv = pop.individuals[-1]
-        #print("WORST ", worst_indiv)
+    # if pop.nb_turns == 0:
+    #     worst_indiv = pop.individuals[-1]
+    # if worst_indiv[1] >= pop.individuals[-1][1]:
+    #     worst_indiv = pop.individuals[-1]
+    #     # print("WORST ", worst_indiv)
 
     # if pop.stats['max_fitness']
-    #for p in pop.individuals:
-        #print(p)
+    # for p in pop.individuals:
+    # print(p)
     print(f'\rturn, {pop.nb_turns}, max : {pop.stats["max_fitness"][-1]} ', end="")
-
 
 
 def function_end(pop):
     print(pop.individuals)
     pop.individuals[0][0].create_midi_file()
-    pop.individuals[len(pop.individuals)-1][0].create_midi_file()
+    # pop.individuals[len(pop.individuals) - 1][0].create_midi_file()
 
     print("best: ", pop.individuals[0])
     pop.individuals[0][0].fitness(should_print=True)
-    pop.individuals[len(pop.individuals)-1][0].fitness(should_print=True)
-
-    global worst_indiv
-    print("Worst ", worst_indiv)
-
-
+    pop.individuals[len(pop.individuals) - 1][0].fitness(should_print=True)
 
 
 parameters = {
-    'configuration name': 'config1',
-    'individual': IndividualDrum,
-    'population size': 100,  # 100 200 500
-    'chromosome size': 12,  # 5 10 50 100
-    'termination_condition': final_condition,
-    'function_each_turn': function_each_turn,
-    'function_end': function_end,
+        'configuration name'   : 'config1',
+        'individual'           : IndividualDrum,
+        'population size'      : 100,  # 100 200 500
+        'chromosome size'      : 12,  # 5 10 50 100
+        'termination_condition': final_condition,
+        'function_each_turn'   : function_each_turn,
+        'function_end'         : function_end,
 
-    'nb turn max': 100,
-    'stop after no change': 5000,
-    'selection': ['select_best'],
-    'proportion selection': 0.2,
-    'crossover': ['individual'],
-    'proportion crossover': 1,
-    'mutation': ['individual'],
-    'proportion mutation': 1,
-    'insertion': 'fitness',  # 'age' 'fitness'
+        'nb turn max'          : 100,
+        'stop after no change' : 5000,
+        'selection'            : ['select_best'],
+        'proportion selection' : 0.2,
+        'crossover'            : ['individual'],
+        'proportion crossover' : 1,
+        'mutation'             : ['individual'],
+        'proportion mutation'  : 1,
+        'insertion'            : 'fitness',  # 'age' 'fitness'
 }
 population = Population(parameters)
 
@@ -96,7 +99,4 @@ def signal_handler():
 signal_handler()
 
 population.start()
-show_stats(population.stats)
-
-
-
+# show_stats(population.stats)

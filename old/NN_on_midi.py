@@ -57,7 +57,7 @@ model.add(Dense(1))
 # model.add(Activation('relu'))
 
 model.compile(loss='mean_squared_error', metrics=['accuracy'], optimizer='adam')
-model.summary()
+# model.summary()
 
 # Calculate pre-training accuracy
 score = model.evaluate(x_test, y_test, verbose=1)

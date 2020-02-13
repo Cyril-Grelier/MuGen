@@ -227,7 +227,7 @@ z = Lambda(sampling, output_shape=(latent_dim,), name='z')([z_mean, z_log_var])
 
 # instantiate encoder model
 encoder = Model(inputs, [z_mean, z_log_var, z], name='encoder')
-encoder.summary()
+# encoder.summary()
 
 
 #DECODER
@@ -252,7 +252,7 @@ outputs = Conv2DTranspose(filters=1,
 
 # instantiate decoder model
 decoder = Model(latent_inputs, outputs, name='decoder')
-decoder.summary()
+# decoder.summary()
 
 
 #Building the VAE
@@ -277,7 +277,7 @@ vae.add_loss(vae_loss)
 
 #Compile the VAE
 vae.compile(optimizer='rmsprop')
-vae.summary()
+# vae.summary()
 
 
 

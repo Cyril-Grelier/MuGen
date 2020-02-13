@@ -89,7 +89,7 @@ class Vae:
 
         # instantiate encoder model
         encoder = Model(inputs, [z_mean, z_log_var, z], name='encoder')
-        encoder.summary()
+        # encoder.summary()
         plot_model(encoder, to_file='vae_mlp_encoder.png', show_shapes=True)
 
         # build decoder model
@@ -99,7 +99,7 @@ class Vae:
 
         # instantiate decoder model
         decoder = Model(latent_inputs, outputs, name='decoder')
-        decoder.summary()
+        # decoder.summary()
         plot_model(decoder, to_file='vae_mlp_decoder.png', show_shapes=True)
 
         # instantiate VAE model
@@ -117,7 +117,7 @@ class Vae:
         # loss = 'binary_crossentropy'
         loss = 'mean_squared_error'
         vae.compile(optimizer='adam', loss=loss)
-        vae.summary()
+        # vae.summary()
         plot_model(vae,
                    to_file='vae_mlp.png',
                    show_shapes=True)

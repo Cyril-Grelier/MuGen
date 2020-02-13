@@ -41,7 +41,7 @@ class Vae:
 
         self.vae, self.encoder, self.decoder = self.compile_model(data_to_initialize_model)
 
-        weights = "/Users/Cyril_Musique/Documents/Cours/M2/MuGen/src/new_evaluator/vae_mlp_mnist.h5"
+        weights = "src/new_evaluator/vae_mlp_mnist.h5"
         print("LOADING WEIGHTS")
         self.vae.load_weights(weights)
 
@@ -94,7 +94,7 @@ class Vae:
 
         # instantiate encoder model
         encoder = Model(inputs, [z_mean, z_log_var, z], name='encoder')
-        encoder.summary()
+        # encoder.summary()
 
 
         # build decoder model
@@ -104,7 +104,7 @@ class Vae:
 
         # instantiate decoder model
         decoder = Model(latent_inputs, outputs, name='decoder')
-        decoder.summary()
+        # decoder.summary()
 
         # instantiate VAE model
         outputs = decoder(encoder(inputs)[2])
@@ -124,7 +124,7 @@ class Vae:
         vae.add_loss(vae_loss)
         opt = Adam(lr=0.0005)  # 0.001 was the default, so try a smaller one
         vae.compile(optimizer=opt, metrics=['accuracy'])
-        vae.summary()
+        # vae.summary()
         return vae, encoder, decoder
 
 

@@ -10,7 +10,6 @@ def create_automate():
     state_24 = State("State 24 ", 24)
     state_32 = State("State 32 ", 32)
 
-
     transisition_0_8 = Transition(initial_state, state_8, 8)
     initial_state.add_transition(transisition_0_8)
 
@@ -90,8 +89,9 @@ class Automate:
         key_duration = self.current_state.transitions_list[random_state].symbol / 8
 
         self.current_state = self.current_state.transitions_list[random_state].destination_state
-        #return Note(random.randint(0, 24), position+key_timestamp, key_duration)
-        return Note(random.randint(0, 12), position + key_timestamp, key_duration)
+        # return Note(random.randint(0, 24), position+key_timestamp, key_duration)
+        # return Note(random.randint(0, 12), position + key_timestamp, key_duration)
+        return Note(12, position + key_timestamp, key_duration)
 
 
 class Transition:
@@ -121,6 +121,7 @@ class State:
 
     def add_transition(self, transition):
         self.transitions_list.append(transition)
+
 
 """
 seq_note = []

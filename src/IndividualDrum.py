@@ -1,37 +1,35 @@
+import logging
 import math
-from random import sample, uniform, randint
 import os
+import random
+from copy import deepcopy
+from random import uniform, randint
+
 import numpy as np
 from algo_gen.classes import Individual, Gene
-from midiutil import MIDIFile
-import pretty_midi
-import random
-from src.Convolutional_VAE.cvae_evaluator import CVae
-from copy import deepcopy
-import tensorflow as tf
-from magenta.models.rl_tuner import rl_tuner_ops
-
-import old.automate_bar_generator  as _automate
-
-from src.Note import  Note
-
-
-
 from magenta.models.rl_tuner import note_rnn_loader
 from magenta.models.rl_tuner import rl_tuner
+from magenta.models.rl_tuner import rl_tuner_ops
+from midiutil import MIDIFile
 
-import src.reward as reward
+import src.automate_bar_generator as _automate
+from src.Convolutional_VAE.cvae_evaluator import CVae
+from src.Note import Note
 
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+logging.getLogger("tensorflow").setLevel(logging.CRITICAL)
+logging.getLogger("tensorflow_hub").setLevel(logging.CRITICAL)
 
+import tensorflow as tf
+
+print(tf.contrib.util.constant_value(tf.ones([1])))
 
 
 def round_down(x, a):
     return math.floor(x / a) * a
 
 
-
 class GeneDrum(Gene):
-
 
     def __init__(self, notes):
         super().__init__()
@@ -49,25 +47,25 @@ class GeneDrum(Gene):
 
 class IndividualDrum(Individual):
     _count = 0
-    vae =CVae()
+    vae = CVae()
 
-    #reward = reward.RLTunerTest()
-    #reward.setUp()
-
-
+    # reward = reward.RLTunerTest()
+    # reward.setUp()
 
     graph = tf.Graph()
     session = tf.Session(graph=graph)
-    note_rnn = note_rnn_loader.NoteRNNLoader(graph, scope='test', checkpoint_dir="/Users/Cyril_Musique/Documents/Cours/M2/MuGen/src/")  # , midi_primer='/tmp/RL/nice.mid')
-    #note_rnn = note_rnn_loader.NoteRNNLoader(graph, scope='test',
+    note_rnn = note_rnn_loader.NoteRNNLoader(graph, scope='test',
+                                             checkpoint_dir=os.getcwd() + "/src/")  # , midi_primer='/tmp/RL/nice.mid')
+    # note_rnn = note_rnn_loader.NoteRNNLoader(graph, scope='test',
     #                                         checkpoint_dir=None)  # , midi_primer='/tmp/RL/nice.mid')
     note_rnn.initialize_new(session)
     with graph.as_default():
         saver = tf.train.Saver(var_list=note_rnn.get_variable_name_dict())
-        saver.save(session,"/tmp/RL/")
+        saver.save(session, "/tmp/RL/")
 
-    rlt = rl_tuner.RLTuner("/Users/Cyril_Musique/Documents/Cours/M2/MuGen/output", note_rnn_checkpoint_dir="/Users/Cyril_Musique/Documents/Cours/M2/MuGen/src/")
-    #rlt = rl_tuner.RLTuner("/Users/Cyril_Musique/Documents/Cours/M2/MuGen/output",
+    rlt = rl_tuner.RLTuner(os.getcwd() + "/output/", note_rnn_checkpoint_dir=os.getcwd() + "/src/")
+
+    # rlt = rl_tuner.RLTuner("/Users/Cyril_Musique/Documents/Cours/M2/MuGen/output",
     #                       note_rnn_checkpoint_dir=None)
 
     def overlapped_keys(self, key_to_check, bars):
@@ -82,7 +80,8 @@ class IndividualDrum(Individual):
     def check_collision(self, key_to_check, changed_pitch, bars):
         for key in bars:
             if (key_to_check.bit.pitch + changed_pitch) == key.bit.pitch:
-                if key_to_check.bit.timestamp <= key.bit.timestamp <= (key_to_check.bit.timestamp + key_to_check.bit.duration):
+                if key_to_check.bit.timestamp <= key.bit.timestamp <= (
+                        key_to_check.bit.timestamp + key_to_check.bit.duration):
                     return False
         return True
 
@@ -141,22 +140,19 @@ class IndividualDrum(Individual):
                 #    self.sequence[index-1].bit.duration*=2
                 #    self.sequence.remove(key)
         """
-        if len(self.sequence)>10:
+        if len(self.sequence) > 10:
             random_note = random.randrange(0, len(self.sequence))
             change_pitch = random.randint(-7, 7)
             key = self.sequence[random_note]
             if key.bit.pitch + change_pitch < 24 and key.bit.pitch + change_pitch > 0:
                 key.bit.pitch += change_pitch
-            #if random.random() > 0.9:
+            # if random.random() > 0.9:
             #    index = self.sequence.index(key)
             #    if index >0:
             #        self.sequence[index-1].bit.duration*=2
             #        self.sequence.remove(key)
         else:
             print("CANNOT")
-
-
-
 
     def crossover(self, other):
         fc = IndividualDrum(self.parameters, empty=True)
@@ -165,64 +161,56 @@ class IndividualDrum(Individual):
         sc.sequence = deepcopy(other.sequence)
         return fc, sc
 
-
     def __init__(self, parameters, empty=False):
         super().__init__(parameters)
         IndividualDrum._count += 1
         self.ind = IndividualDrum._count
-        max_number_of_notes = 8 # 16 POUR 2 MESURES
-        self.length=4 #*4 = 8 MESURES
-        self.number_of_notes = max_number_of_notes*self.length #randint(0, max_number_of_notes)
+        max_number_of_notes = 8  # 16 POUR 2 MESURES
+        self.length = 4  # *4 = 8 MESURES
+        self.number_of_notes = max_number_of_notes * self.length  # randint(0, max_number_of_notes)
         if not empty:
             self.generate_seq()
 
-
-
-    def create_midi_file(self):
+    def create_midi_file(self, file_name=None):
         track = 0
-        channel = 9
+        channel = 1
         tempo = 120  # In BPM
         volume = 100  # 0-127, as per the MIDI standard
         my_midi = MIDIFile(1)  # One track, defaults to format 1 (tempo track is created automatically)
         my_midi.addTempo(track, 0, tempo)
-        my_midi.addProgramChange(0, 10, 0, 0)
+        # my_midi.addProgramChange(0, 10, 0, 0)
         my_midi.tracks[0].addChannelPressure(0, 4, 0)
 
         repertory = "output/"
-        file = str(self.ind) + ".mid"
+        if file_name is not None:
+            file = file_name + ".mid"
+        else:
+            file = str(self.ind) + ".mid"
         for note in self.sequence:
             # print(note)
-            my_midi.addNote(track, channel, note.bit.pitch+36, note.bit.timestamp, note.bit.duration, volume)
+            my_midi.addNote(track, channel, note.bit.pitch + 36, note.bit.timestamp, note.bit.duration, volume)
 
         with open(repertory + file, "wb") as output_file:
             my_midi.writeFile(output_file)
 
     def generate_note(self):
 
-        #allowed_pitch = [36, 38, 42, 46, 41, 45, 48, 51, 49]
-        new_note = Note(random.randrange(0,24), round_down(round(uniform(0, 7.75), 2), 0.25), 0.25) #QUANTIZED MELO
-        #new_note = Note(sample(allowed_pitch, 1)[0], round_down(round(uniform(0, 7.75), 2), 0.25), 0.25) #QUANTIZED
-        #new_note = Note(random.sample(allowed_pitch, 1)[0], round(random.uniform(0, 7.75), 2), 0.25) #UNQUANTIZED
+        # allowed_pitch = [36, 38, 42, 46, 41, 45, 48, 51, 49]
+        new_note = Note(random.randrange(0, 24), round_down(round(uniform(0, 7.75), 2), 0.25), 0.25)  # QUANTIZED MELO
+        # new_note = Note(sample(allowed_pitch, 1)[0], round_down(round(uniform(0, 7.75), 2), 0.25), 0.25) #QUANTIZED
+        # new_note = Note(random.sample(allowed_pitch, 1)[0], round(random.uniform(0, 7.75), 2), 0.25) #UNQUANTIZED
         if new_note not in self.sequence:
             self.sequence.append(GeneDrum(new_note))
 
-
-
-
-
-
-
-
     def generate_seq(self):
-
 
         for i in range(16):
             automate = _automate.create_automate()
-            while (automate.has_finished() == False):
+            while not automate.has_finished():
                 self.sequence.append(GeneDrum(automate.next_state(position=i * 4)))
 
         # Create a PrettyMIDI object
-        #pm = pretty_midi.PrettyMIDI()
+        # pm = pretty_midi.PrettyMIDI()
         """
         RL = True
         if not RL:
@@ -260,19 +248,17 @@ class IndividualDrum(Individual):
         # b = np.array(self.sequence)
         # print(b.shape)
         '''
+
     def fitness(self, should_print=False):
-
-
-        #self.create_midi_file()
-        #repertory = "output/"
-        #file = repertory + str(self.ind) + ".mid"
-
-
 
         RL = True
         if not RL:
-            return -abs(self.vae.get_distance(file, self.ind ))
-        if RL:
+            # self.create_midi_file()
+            repertory = "output/"
+            file = repertory + str(self.ind) + ".mid"
+
+            return -abs(self.vae.get_distance(file, self.ind))
+        else:
             '''
             self.rlt.train(num_steps=100000, exploration_period=500000)
 
@@ -283,59 +269,55 @@ class IndividualDrum(Individual):
             exit(0)
             '''
 
-            #print("NOTE COMPO: ")
-            self.rlt.num_notes_in_melody=self.number_of_notes
+            # print("NOTE COMPO: ")
+            self.rlt.num_notes_in_melody = self.number_of_notes
             self.rlt.reset_composition()
             to_mean_note_reward = []
             to_mean_rnn = []
             for note in self.sequence:
-
                 one_hot = np.array(rl_tuner_ops.make_onehot([note.bit.pitch], 38)).flatten()
                 note_reward = self.rlt.reward_music_theory(one_hot)
-                #if should_print:
+                # if should_print:
                 #    print(one_hot,note_reward )
                 self.rlt.composition.append(np.argmax(one_hot))
                 self.rlt.beat += 1
                 to_mean_note_reward.append(note_reward)
-                a,b,c = self.rlt.action(one_hot)
-
+                a, b, c = self.rlt.action(one_hot)
 
                 reward_scores = np.reshape(c, (38))
 
-                #print(to_mean_rnn)
+                # print(to_mean_rnn)
 
-                note_rnn_reward = self.rlt.reward_from_reward_rnn_scores(one_hot,reward_scores)
+                note_rnn_reward = self.rlt.reward_from_reward_rnn_scores(one_hot, reward_scores)
                 to_mean_rnn.append(note_rnn_reward)
 
-
-            #print(self.rlt.composition)
+            # print(self.rlt.composition)
             mean_note_reward = np.mean(to_mean_note_reward)
             to_mean_rnn = np.mean(to_mean_rnn)
             return to_mean_rnn + mean_note_reward
-            #print(to_mean_note_reward)
-            if len(to_mean_note_reward)>8:
-                worst_score = np.min(to_mean_note_reward)
-
-            #print("mean", mean_note_reward)
-            if len(to_mean_note_reward) > 8:
-                #if should_print:
-                #    print("Worst : ",worst_score, " mean :", mean_note_reward, " ALL ", worst_score * 0.8 + 0.2 * mean_note_reward)
-                return worst_score*0.8+0.2*mean_note_reward
-            else:
-                return -100
-
+            # # print(to_mean_note_reward)
+            # if len(to_mean_note_reward) > 8:
+            #     worst_score = np.min(to_mean_note_reward)
+            #
+            # # print("mean", mean_note_reward)
+            # if len(to_mean_note_reward) > 8:
+            #     # if should_print:
+            #     #    print("Worst : ",worst_score, " mean :", mean_note_reward, " ALL ", worst_score * 0.8 + 0.2 * mean_note_reward)
+            #     return worst_score * 0.8 + 0.2 * mean_note_reward
+            # else:
+            #     return -100
 
     def __eq__(self, other):
-            if type(other) != type(self):
+        if type(other) != type(self):
+            return False
+        for a, b in zip(self.sequence, other.sequence):
+            if a.bit != b.bit:
                 return False
-            for a, b in zip(self.sequence, other.sequence):
-                if a.bit != b.bit:
-                    return False
-            return True
+        return True
 
     def __repr__(self):
-        #r = f"I: {self.fitness()}"
-        #for g in self.sequence:
+        # r = f"I: {self.fitness()}"
+        # for g in self.sequence:
         #    r += f'\n\t{g.bit}'
         r = str(self.ind)
         return r
@@ -351,7 +333,7 @@ if __name__ == '__main__':
     i = IndividualDrum({'chromosome size': 12})
     # print(i)
     # convert_to_midi(i, "coucou.mid", "../../output/")
-    #print(f'i.fitness() : {i.fitness()}')
+    # print(f'i.fitness() : {i.fitness()}')
 
 # if __name__ == '__main__':
 #     parser = argparse.ArgumentParser()

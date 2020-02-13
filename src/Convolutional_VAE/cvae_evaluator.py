@@ -26,7 +26,6 @@ class CVae:
     index = 0
 
     def __init__(self):
-        print("ici")
         self.epochs = 10
         self.batch_size = 32
         self.intermediate_dim = 128
@@ -45,7 +44,7 @@ class CVae:
 
         #self.plot = plt.plot([], [])
 
-        path_midi_file_to_initialize_model = "/Users/Cyril_Musique/Documents/Cours/M2/MuGen/ressources/file_to_load_model/example_midi_file.mid"
+        path_midi_file_to_initialize_model = "ressources/file_to_load_model/example_midi_file.mid"
         #path_midi_file_to_initialize_model = "/home/kyrillos/CODE/VAEMIDI/MuGen-master/ressources/file_to_load_model/example_midi_file.mid"
         data_to_initialize_model = self.load_data(path_midi_file_to_initialize_model, 0, 2)
 
@@ -60,7 +59,7 @@ class CVae:
 
         #REMEMBER NO WEIGHTS
 
-        data_to_plot = self.load_all_data("/Users/Cyril_Musique/Documents/Cours/M2/MuGen/datasets/quantized_rythm_dataset_v2_temperature/100",1,0)
+        data_to_plot = self.load_all_data("datasets/quantized_rythm_dataset_v2_temperature/100",1,0)
         self.create_plot(data_to_plot)
 
     def create_plot(self, data_to_plot):
@@ -148,7 +147,7 @@ class CVae:
 
         # instantiate encoder model
         encoder = Model(inputs, [z_mean, z_log_var, z], name='encoder')
-        encoder.summary()
+        # encoder.summary()
 
         # DECODER
         latent_inputs = Input(shape=(self.latent_dim,), name='z_sampling')
@@ -172,7 +171,7 @@ class CVae:
 
         # instantiate decoder model
         decoder = Model(latent_inputs, outputs, name='decoder')
-        decoder.summary()
+        # decoder.summary()
 
         # Building the VAE
         outputs = decoder(encoder(inputs)[2])
@@ -195,7 +194,7 @@ class CVae:
 
         # Compile the VAE
         vae.compile(optimizer='rmsprop')
-        vae.summary()
+        # vae.summary()
         return vae, encoder, decoder
 
     def load_all_data(self,path, class_label, index_filename):
