@@ -170,7 +170,7 @@ class IndividualDrum(Individual):
         super().__init__(parameters)
         IndividualDrum._count += 1
         self.ind = IndividualDrum._count
-        max_number_of_notes = 16 #POUR 2 MESURES
+        max_number_of_notes = 8 # 16 POUR 2 MESURES
         self.length=4 #*4 = 8 MESURES
         self.number_of_notes = max_number_of_notes*self.length #randint(0, max_number_of_notes)
         if not empty:
