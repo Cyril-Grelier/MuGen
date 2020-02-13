@@ -33,3 +33,7 @@ conda install -c anaconda keras-gpu
  pip install pydot
  
  sudo apt install graphviz
+ 
+ 
+ 
+sudo apt-get install build-essential libasound2-dev libjack-dev portaudio19-dev

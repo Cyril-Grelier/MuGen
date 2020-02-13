@@ -107,6 +107,7 @@ def rnn4(network_input_shape):
     model.add(LSTM(800, input_shape=input_shape, return_sequences=True))
     model.add(LSTM(800, return_sequences=True))
     model.add(LSTM(400, return_sequences=False))
+    model.add(Dropout(0.2))
     model.add(Dense(200, activation='sigmoid'))
     # model.add(Dense(200, activation='sigmoid'))
     model.add(Dense(1, activation='sigmoid'))

@@ -180,3 +180,24 @@ plot_histo('val_accuracy', log)
 #
 #
 # log = fit(model, 'nn_feat', network_input, network_output, epochs=200, batch_size=32)
+
+
+# charger les donnees dans une matrice, une ligne = 1 tirage
+
+# ajouter un zero au debut et a la fin de chaque ligne
+
+# pour chaque ligne convertir chaque nombre en one hot, tableau de 0 et 1 ( le 1 devient [1,0,0,0,0,...], le 2 [0,1,0,0,0,0,...])
+
+# pour chaque ligne faire une donnee entree (le one hot moins la derniere valeur) et une donne sortie, (le one hot moins la premiere valeur)
+
+# separer les donnees en deux, genre 70% pour les donnees d'entrainement 30% pour les tests
+
+# creer le modele rnn (les input shape c'est chiant)
+
+# le compiler, voir avec Romain ou Olivier Goudet pour la loss et les fonctions d'activation
+
+# fit avec les donnees d entree et sortie d'entrainement
+
+# faire un predict avec les donnees d entree et de sortie de test
+
+# regarder l'accuracy

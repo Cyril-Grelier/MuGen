@@ -183,7 +183,7 @@ class Vae:
         # # Convert features & labels into numpy arrays
         # X = np.array(featuresdf.feature.tolist())
         # y = np.array(featuresdf.class_label.tolist())
-        from src.data import prepare_data_midi
+        from src.data import  prepare_data_midi
         X, y = prepare_data_midi()
 
         # print(X.shape, y.shape)
