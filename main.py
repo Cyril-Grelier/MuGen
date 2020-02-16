@@ -66,7 +66,7 @@ parameters = {
         'function_each_turn'   : function_each_turn,
         'function_end'         : function_end,
 
-        'nb turn max'          : 100,
+        'nb turn max'          : 1000,
         'stop after no change' : 5000,
         'selection'            : ['select_best'],
         'proportion selection' : 0.2,
