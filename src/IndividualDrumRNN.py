@@ -81,7 +81,7 @@ class IndividualDrum(Individual):
             # else:
             #     self.generate_note()
 
-    def create_midi_file(self):
+    def create_midi_file(self, file_name=None):
         track = 0
         channel = 9
         tempo = 120  # In BPM
@@ -92,7 +92,10 @@ class IndividualDrum(Individual):
         my_midi.tracks[0].addChannelPressure(0, 4, 0)
 
         repertory = "output/"
-        file = str(self.ind) + ".mid"
+        if file_name is not None:
+            file = file_name + ".mid"
+        else:
+            file = str(self.ind) + ".mid"
         for note in self.sequence:
             my_midi.addNote(track, channel, note.bit.pitch, note.bit.timestamp, note.bit.duration, volume)
 
@@ -116,9 +119,9 @@ class IndividualDrum(Individual):
 
     def fitness(self):
         # class
-        self.create_midi_file()
         repertory = "output/"
         file = repertory + str(self.ind) + ".mid"
+        self.create_midi_file(str(self.ind))
         data = get_drum(file)
         if type(data) == type(None):
             return 0

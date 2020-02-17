@@ -1,12 +1,28 @@
-import signal
 
-from algo_gen.classes import Population
-from algo_gen.tools.plot import show_stats
-
-# from src.IndividualDrumRNN import IndividualDrum
-from src.IndividualDrum import IndividualDrum
 import os
+import signal
 from glob import glob
+
+import matplotlib.pyplot as plt
+from algo_gen.classes import Population
+
+from src.IndividualDrumRNN import IndividualDrum
+# from src.IndividualDrum import IndividualDrum
+
+def show_stats(stats, title=None):
+    fig, ax = plt.subplots(figsize=(8, 8))
+
+    if title:
+        plt.title(title)
+    plt.xlabel("tours")
+    plt.ylabel('fitness')
+    plt.xlim(0, len(stats['max_fitness']))
+
+    ax.plot(stats['max_fitness'], color='red', label='max')
+    ax.plot(stats['min_fitness'], color='green', label='min')
+    ax.plot(stats['mean_fitness'], color='blue', label='mean')
+    plt.legend(title='fitness', loc='lower right')
+    plt.show()
 
 
 def final_condition(pop):
@@ -53,30 +69,30 @@ def function_end(pop):
     # pop.individuals[len(pop.individuals) - 1][0].create_midi_file()
 
     print("best: ", pop.individuals[0])
-    pop.individuals[0][0].fitness(should_print=True)
-    pop.individuals[len(pop.individuals) - 1][0].fitness(should_print=True)
+    pop.individuals[0][0].fitness()
+    pop.individuals[len(pop.individuals) - 1][0].fitness()
 
 
 parameters = {
         'configuration name'   : 'config1',
         'individual'           : IndividualDrum,
-        'population size'      : 100,  # 100 200 500
+        'population size'      : 50,  # 100 200 500
         'chromosome size'      : 12,  # 5 10 50 100
         'termination_condition': final_condition,
         'function_each_turn'   : function_each_turn,
         'function_end'         : function_end,
 
-        'nb turn max'          : 100,
+        'nb turn max'          : 1000,
         'stop after no change' : 5000,
         'selection'            : ['select_best'],
-        'proportion selection' : 0.2,
+        'proportion selection' : 4,
         'crossover'            : ['individual'],
         'proportion crossover' : 1,
         'mutation'             : ['individual'],
         'proportion mutation'  : 1,
         'insertion'            : 'fitness',  # 'age' 'fitness'
 }
-population = Population(parameters)
+population = Population(parameters, description=True)
 
 
 def stop(signum, frame):
@@ -99,4 +115,4 @@ def signal_handler():
 signal_handler()
 
 population.start()
-# show_stats(population.stats)
+show_stats(population.stats)

@@ -18,13 +18,10 @@ def extract_feature(file_name):
         if len(midi_data.instruments) > 0:
             data = midi_data.get_piano_roll(fs=8)
             data.resize(3968)
-        return np.array([data])
-
+            return np.array([data])
     except Exception as e:
         print("Error parsing file : ", file_name)
         return None, None
-
-    return np.array([data])
 
 
 def get_midifeat():
@@ -80,11 +77,10 @@ def prepare_data_midi_reg():
             # print(class_inter)
             out_interpolation.append(float(class_inter) / 100)
             morceau = get_drum(file)
+            morceaux.append(morceau)
             # import matplotlib.pyplot as plt
             # plt.imshow(morceau)
             # plt.show()
-            morceaux.append(morceau)
-    print(f'diff classes : {set(out_interpolation)}')
     network_input = np.stack(morceaux)
 
     print(network_input.shape)
@@ -102,13 +98,13 @@ def prepare_data_midi_class():
         cur = [0] * len(diff_classes)
         cur[diff_classes.index(v)] = 1
         out.append(cur)
-    return network_input, np.array(out)
+    return network_input, np.array(out), diff_classes
 
 
 def prepare_data_cnn():
-    network_input, network_output = prepare_data_midi_class()
+    network_input, network_output, diff_classes = prepare_data_midi_class()
     network_input = network_input.reshape(network_input.shape[0], network_input.shape[1], network_input.shape[2], 1)
-    return network_input, network_output
+    return network_input, network_output, diff_classes
 
 
 def prepare_data_features():
@@ -123,14 +119,21 @@ def prepare_data_features():
     network_input = np.asarray(features)
     network_output = np.asarray(out_interpolation)
     print(network_output.shape)
-    return network_input, network_output
+    diff_classes = list(set(network_output))
+    diff_classes.sort()
+    out = []
+    for v in network_output:
+        cur = [0] * len(diff_classes)
+        cur[diff_classes.index(v)] = 1
+        out.append(cur)
+    return network_input, np.array(out), diff_classes
 
 
 def load_data_midi():
     morceaux = []
     out_interpolation = []
 
-    for file in tqdm(glob("../resources/interpolates_files/*.mtr")):
+    for file in tqdm(glob("../ressources/interpolates_files/*.mtr")):
         # print("Parsing %s" % file)
         out_interpolation.append(float(file.split('/')[-1].split("_")[1].split(".")[0]) / 100)
         morceaux.append(np.loadtxt(file, dtype=bool))
@@ -147,14 +150,24 @@ def load_data_feat():
     features = []
     out_interpolation = []
 
-    for file in tqdm(glob("../resources/interpolates_files/*.feat")):
-        out_interpolation.append(float(file.split('/')[-1].split("_")[1].split(".")[0]) / 100)
-        features.append(np.loadtxt(file))
+    for file in tqdm(glob("../ressources/interpolates_files/*.feat")):
+        class_inter = int(file.split('/')[-1].split("_")[1].split(".")[0])
+        if class_inter in list(range(0, 101, 10)):
+            out_interpolation.append(float(class_inter) / 100)
+            features.append(np.loadtxt(file))
 
     network_input = np.asarray(features)
+    network_input = network_input[:, ~np.all(network_input[1:] == network_input[:-1], axis=0)]
     network_output = np.asarray(out_interpolation)
     print(network_output.shape)
-    return network_input, network_output
+    diff_classes = list(set(network_output))
+    diff_classes.sort()
+    out = []
+    for v in network_output:
+        cur = [0] * len(diff_classes)
+        cur[diff_classes.index(v)] = 1
+        out.append(cur)
+    return network_input, np.array(out), diff_classes
 
 
 def get_features(file):
@@ -270,5 +283,5 @@ def get_features(file):
     #                                includeId=False,
     #                                concatenateLists=False)
     allData = features.allFeaturesAsList(s)
-    print(allData)
+    # print(allData)
     return np.asarray(list(itertools.chain(*allData)))

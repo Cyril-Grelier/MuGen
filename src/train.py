@@ -2,6 +2,9 @@ import os
 from datetime import datetime
 
 import tensorflow as tf
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import train_test_split
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 from tensorflow.python.keras.callbacks import TensorBoard, EarlyStopping
@@ -17,11 +20,10 @@ from src.models import plot_histo
 #     print(predicted_vector)
 
 def train_model(model_type, data_fct, loss, optimizer, epochs, batch_size, name):
-    network_input, network_output = data_fct()
-    model = model_type(network_input.shape)
+    network_input, network_output, diff_classes = data_fct()
+    model = model_type(network_input, diff_classes)
     compile(model, loss, optimizer)
-    log = fit(model, name, network_input, network_output, epochs, batch_size)
-    return log
+    return fit(model, name, network_input, network_output, epochs, batch_size, diff_classes)
 
 
 def compile(model, loss, optimizer):
@@ -30,7 +32,7 @@ def compile(model, loss, optimizer):
     tf.keras.utils.plot_model(model, to_file='model_archi.png', show_shapes=True)
 
 
-def fit(model, name, network_input, network_output, epochs, batch_size):
+def fit(model, name, network_input, network_output, epochs, batch_size, diff_classes):
     save_directory = 'test/'
     log = save_directory + 'log'
     model_weights = save_directory + 'model_weights_' + str(name) + '.h5'
@@ -52,15 +54,40 @@ def fit(model, name, network_input, network_output, epochs, batch_size):
         json_file.write(model_json)
     print("Model saved")
 
-    log = model.fit(network_input, network_output, epochs=epochs, batch_size=batch_size, callbacks=callbacks_list,
+    X_train, X_test, y_train, y_test = train_test_split(network_input, network_output, shuffle=True)
+    log = model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, callbacks=callbacks_list,
                     validation_split=0.1, shuffle=True)
+    y_pred = model.predict(X_test)
+    predictions = []
+
+    print(diff_classes)
+    for p in y_pred:
+        argmax = p.argmax()
+        predictions.append(int(diff_classes[argmax]*10))
+
+    reel = []
+    for r in y_test:
+        reel.append(int(diff_classes[r.argmax()]*10))
+
+    print(reel)
+    print(predictions)
+    # y_pred = y_pred.ravel()
+    # fpr_keras, tpr_keras, thresholds_keras = roc_curve(y_test, y_pred)
+    # auc_keras = auc(fpr_keras, tpr_keras)
+    conf = confusion_matrix(reel, predictions)
+    models.plot_conf_matrix(conf, diff_classes)
+    print(conf)
+    acc = accuracy_score(reel, predictions)
+    print(f'accuracy : {acc}')
     return log
 
 
-# log = train_model(models.cnn1, d.prepare_data_cnn, loss='binary_crossentropy', optimizer=Adam(lr=0.01), epochs=200, batch_size=16, name='rnn4')
+log = train_model(models.cnn1, d.prepare_data_cnn, loss='binary_crossentropy', optimizer=Adam(lr=0.001), epochs=200, batch_size=16, name='cnn1')
 # binary_crossentropy
-log = train_model(models.rnn7, d.prepare_data_midi_class, loss='binary_crossentropy', optimizer=Adam(lr=0.01),
-                  epochs=200, batch_size=16, name='rnn4')
+# log = train_model(models.rnn7, d.prepare_data_midi_class, loss='binary_crossentropy', optimizer=Adam(lr=0.001), epochs=200, batch_size=16, name='rnn7')
+# log = train_model(models.nn_feat_1, d.load_data_feat, loss='binary_crossentropy', optimizer=Adam(lr=0.01), epochs=200, batch_size=16, name='nn_feat')
+# mean_squared_error
+print(log.history)
 
 plot_histo('loss', log)
 plot_histo('accuracy', log)
@@ -180,24 +207,3 @@ plot_histo('val_accuracy', log)
 #
 #
 # log = fit(model, 'nn_feat', network_input, network_output, epochs=200, batch_size=32)
-
-
-# charger les donnees dans une matrice, une ligne = 1 tirage
-
-# ajouter un zero au debut et a la fin de chaque ligne
-
-# pour chaque ligne convertir chaque nombre en one hot, tableau de 0 et 1 ( le 1 devient [1,0,0,0,0,...], le 2 [0,1,0,0,0,0,...])
-
-# pour chaque ligne faire une donnee entree (le one hot moins la derniere valeur) et une donne sortie, (le one hot moins la premiere valeur)
-
-# separer les donnees en deux, genre 70% pour les donnees d'entrainement 30% pour les tests
-
-# creer le modele rnn (les input shape c'est chiant)
-
-# le compiler, voir avec Romain ou Olivier Goudet pour la loss et les fonctions d'activation
-
-# fit avec les donnees d entree et sortie d'entrainement
-
-# faire un predict avec les donnees d entree et de sortie de test
-
-# regarder l'accuracy
