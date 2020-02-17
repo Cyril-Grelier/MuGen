@@ -90,8 +90,8 @@ class Automate:
 
         self.current_state = self.current_state.transitions_list[random_state].destination_state
         # return Note(random.randint(0, 24), position+key_timestamp, key_duration)
-        # return Note(random.randint(0, 12), position + key_timestamp, key_duration)
-        return Note(12, position + key_timestamp, key_duration)
+        return Note(random.randint(0, 12), position + key_timestamp, key_duration)
+        #return Note(12, position + key_timestamp, key_duration)
 
 
 class Transition:
