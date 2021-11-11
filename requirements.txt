@@ -1,5 +1,5 @@
 pretty_midi==0.2.8
-tensorflow_gpu==2.1.0
+tensorflow_gpu
 MIDIUtil==1.2.1
 numpy==1.18.1
 matplotlib==3.1.3
